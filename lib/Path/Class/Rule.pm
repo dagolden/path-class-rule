@@ -48,10 +48,16 @@ sub add_rule {
   return $self;
 }
 
+my %defaults = (
+  follow_symlinks => 1,
+  depthfirst => 0,
+);
+
 sub iter {
   my $self = shift;
-  my $opts =  ref($_[0])  && !blessed($_[0])  ? shift
+  my $args =  ref($_[0])  && !blessed($_[0])  ? shift
             : ref($_[-1]) && !blessed($_[-1]) ? pop : {};
+  my $opts = { %defaults, %$args };
   my @queue = map { dir($_) } @_ ? @_ : '.';
   my $filter = $self->{item_filter};
   my $stash = $self->{stash};
@@ -61,6 +67,9 @@ sub iter {
     LOOP: {
       my $item = shift @queue
         or return;
+      if ( ! $opts->{follow_symlinks} ) {
+        redo LOOP if -l $item;
+      }
       local $_ = $item;
       my ($interest, $prune) = $filter->($item, $stash);
       if ($item->is_dir && ! $seen{$item}++ && ! $prune) {
