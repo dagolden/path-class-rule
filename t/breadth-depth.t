@@ -24,33 +24,57 @@ use Path::Class::Rule;
   );
 
   my @breadth = qw(
+    .
     aaaa.txt
     bbbb.txt
+    cccc
     gggg.txt
-    dddd.txt
-    ffff.txt
+    cccc/dddd.txt
+    cccc/eeee
+    cccc/eeee/ffff.txt
   );
   
-  my @depth = qw(
+  my @depth_pre = qw(
+    .
     aaaa.txt
     bbbb.txt
-    dddd.txt
-    ffff.txt
+    cccc
+    cccc/dddd.txt
+    cccc/eeee
+    cccc/eeee/ffff.txt
     gggg.txt
+  );
+
+  my @depth_post = qw(
+    aaaa.txt
+    bbbb.txt
+    cccc/dddd.txt
+    cccc/eeee/ffff.txt
+    cccc/eeee
+    cccc
+    gggg.txt
+    .
   );
 
   my $td = make_tree(@tree);
 
   my ($iter, @files);
-  my $rule = Path::Class::Rule->new->is_file;
+  my $rule = Path::Class::Rule->new;
 
-  @files = ();
-  @files = map { $_->basename } $rule->all({depthfirst => 0}, $td);
-  cmp_deeply( \@files, \@breadth, "Breadth first iteration");
+  @files = map  { $_->relative($td)->stringify }
+                $rule->all({depthfirst => 0}, $td);
+  cmp_deeply( \@files, \@breadth, "Breadth first iteration")
+    or diag explain \@files;
 
-  @files = ();
-  @files = map { $_->basename } $rule->all({depthfirst => 1}, $td);
-  cmp_deeply( \@files, \@depth, "Depth first iteration");
+  @files = map  { $_->relative($td)->stringify }
+                $rule->all({depthfirst => 1}, $td);
+  cmp_deeply( \@files, \@depth_pre, "Depth first iteration (pre)")
+    or diag explain \@files;
+
+  @files = map  { $_->relative($td)->stringify }
+                $rule->all({depthfirst => -1}, $td);
+  cmp_deeply( \@files, \@depth_post, "Depth first iteration (post)")
+    or diag explain \@files;
 
 }
 

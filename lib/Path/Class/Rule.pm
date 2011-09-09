@@ -55,6 +55,7 @@ sub iter {
   my @queue = map { dir($_) } @_ ? @_ : '.';
   my $filter = $self->{item_filter};
   my $stash = $self->{stash};
+  my %seen;
 
   return sub {
     LOOP: {
@@ -62,9 +63,12 @@ sub iter {
         or return;
       local $_ = $item;
       my ($interest, $prune) = $filter->($item, $stash);
-      if ($item->is_dir && ! $prune) {
+      if ($item->is_dir && ! $seen{$item}++ && ! $prune) {
         if ( $opts->{depthfirst} ) {
-          unshift @queue, sort $item->children;
+          my @next = sort $item->children;
+          push @next, $item if $opts->{depthfirst} < 0; # repeat for postorder
+          unshift @queue, @next;
+          redo LOOP if $opts->{depthfirst} < 0;
         }
         else {
           push @queue, sort $item->children;
