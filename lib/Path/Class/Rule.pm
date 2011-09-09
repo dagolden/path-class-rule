@@ -62,8 +62,14 @@ sub iter {
         or return;
       local $_ = $item;
       my ($interest, $prune) = $filter->($item, $stash);
-      push @queue, $item->children
-        if $item->is_dir && ! $prune;
+      if ($item->is_dir && ! $prune) {
+        if ( $opts->{depthfirst} ) {
+          unshift @queue, sort $item->children;
+        }
+        else {
+          push @queue, sort $item->children;
+        }
+      }
       return $item
         if $interest;
       redo LOOP;
