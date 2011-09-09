@@ -13,12 +13,17 @@ use Scalar::Util qw/blessed reftype/;
 use List::Util qw/first/;
 
 #--------------------------------------------------------------------------#
-# class methods
+# constructors and meta methods
 #--------------------------------------------------------------------------#
 
 sub new {
   my $class = shift;
   return bless { rules => [ sub {1} ] }, ref $class || $class;
+}
+
+sub clone {
+  my $self = shift;
+  return bless { %$self }, ref $self;
 }
 
 sub add_helper {
@@ -35,62 +40,8 @@ sub add_helper {
 }
 
 #--------------------------------------------------------------------------#
-# object methods
+# iteration methods
 #--------------------------------------------------------------------------#
-
-sub clone {
-  my $self = shift;
-  return bless { %$self }, ref $self;
-}
-
-sub test {
-  my ($self, $item) = @_;
-  my $result;
-  for my $rule ( @{$self->{rules}} ) {
-    $result = $rule->($item);
-    return $result if ! (0+$result); # want to shortcut on "0 but true"
-  }
-  return $result;
-}
-
-sub _rulify {
-  my ($self, $method, @args) = @_;
-  my @rules;
-  for my $arg ( @args ) {
-    my $rule;
-    if ( blessed($arg) && $arg->isa("Path::Class::arg") ) {
-      $rule = sub { $rule->test(@_) };
-    }
-    elsif ( ref($arg) eq 'CODE' ) {
-      $rule = $arg;
-    }
-    else {
-      Carp::croak("Argument to ->and() must be coderef or Path::Class::Rule")
-    }
-    push @rules, $rule
-  }
-  return @rules
-}
-
-sub and {
-  my $self = shift;
-  push @{$self->{rules}}, $self->_rulify("and", @_);
-  return $self;
-}
-
-sub or {
-  my $self = shift;
-  my @rules = $self->_rulify("or", @_);
-  return sub {
-    my $item = shift;
-    my $result;
-    for my $rule ( @rules ) {
-      $result = $rule->($item);
-      return $result if $result; # want to shortcut on "0 but true"
-    }
-    return $result;
-  };
-}
 
 my %defaults = (
   follow_symlinks => 1,
@@ -145,7 +96,64 @@ sub all {
 }
 
 #--------------------------------------------------------------------------#
-# common helpers
+# logic methods
+#--------------------------------------------------------------------------#
+
+sub and {
+  my $self = shift;
+  push @{$self->{rules}}, $self->_rulify("and", @_);
+  return $self;
+}
+
+sub or {
+  my $self = shift;
+  my @rules = $self->_rulify("or", @_);
+  return sub {
+    my $item = shift;
+    my $result;
+    for my $rule ( @rules ) {
+      $result = $rule->($item);
+      return $result if $result; # want to shortcut on "0 but true"
+    }
+    return $result;
+  };
+}
+
+sub test {
+  my ($self, $item) = @_;
+  my $result;
+  for my $rule ( @{$self->{rules}} ) {
+    $result = $rule->($item);
+    return $result if ! (0+$result); # want to shortcut on "0 but true"
+  }
+  return $result;
+}
+
+#--------------------------------------------------------------------------#
+# private methods
+#--------------------------------------------------------------------------#
+
+sub _rulify {
+  my ($self, $method, @args) = @_;
+  my @rules;
+  for my $arg ( @args ) {
+    my $rule;
+    if ( blessed($arg) && $arg->isa("Path::Class::arg") ) {
+      $rule = sub { $rule->test(@_) };
+    }
+    elsif ( ref($arg) eq 'CODE' ) {
+      $rule = $arg;
+    }
+    else {
+      Carp::croak("Argument to ->and() must be coderef or Path::Class::Rule")
+    }
+    push @rules, $rule
+  }
+  return @rules
+}
+
+#--------------------------------------------------------------------------#
+# built-in helpers
 #--------------------------------------------------------------------------#
 
 sub _regexify {
