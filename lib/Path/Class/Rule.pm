@@ -185,6 +185,35 @@ while ( my ($k,$v) = each %simple_helpers ) {
   __PACKAGE__->add_helper( $k, sub { return $v } );
 }
 
+# X_tests adapted from File::Find::Rule
+my %X_tests = (
+    -r  =>  readable           =>  -R  =>  r_readable      =>
+    -w  =>  writeable          =>  -W  =>  r_writeable     =>
+    -w  =>  writable           =>  -W  =>  r_writable      =>
+    -x  =>  executable         =>  -X  =>  r_executable    =>
+    -o  =>  owned              =>  -O  =>  r_owned         =>
+
+    -e  =>  exists             =>  -f  =>  file            =>
+    -z  =>  empty              =>  -d  =>  directory       =>
+    -s  =>  nonempty           =>  -l  =>  symlink         =>
+                               =>  -p  =>  fifo            =>
+    -u  =>  setuid             =>  -S  =>  socket          =>
+    -g  =>  setgid             =>  -b  =>  block           =>
+    -k  =>  sticky             =>  -c  =>  character       =>
+                               =>  -t  =>  tty             =>
+    -M  =>  modified                                       =>
+    -A  =>  accessed           =>  -T  =>  ascii           =>
+    -C  =>  changed            =>  -B  =>  binary          =>
+);
+
+while ( my ($op,$name) = each %X_tests ) {
+  my $coderef = eval "sub { $op \$_ }";
+  my $not_coderef = eval "sub { ! $op \$_ }";
+  __PACKAGE__->add_helper( $name, sub { return $coderef } );
+  __PACKAGE__->add_helper( "not_$name", sub { return $not_coderef } );
+}
+
+
 1;
 
 =for Pod::Coverage method_names_here
