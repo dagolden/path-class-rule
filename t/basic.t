@@ -29,29 +29,29 @@ use Path::Class::Rule;
     push @files, $f;
   }
 
-  is( scalar @files, 1, "Iterator: one file");
+  is( scalar @files, 1, "Iterator: one file") or diag explain \@files;
 
   @files = ();
   @files = $rule->all($td);
 
-  is( scalar @files, 1, "All: one file");
+  is( scalar @files, 1, "All: one file") or diag explain \@files;
 
   $rule = Path::Class::Rule->new->is_dir;
   @files = ();
-  @files = $rule->all($td);
+  @files = map { "$_" } $rule->all($td);
 
-  is( scalar @files, 3, "All: 3 directories");
+  is( scalar @files, 3, "All: 3 directories") or diag explain \@files;
 
   my $wd = pushd($td);
 
   @files = ();
-  @files = $rule->all();
-  is( scalar @files, 3, "All w/ cwd: 3 directories");
+  @files = map { "$_" } $rule->all();
+  is( scalar @files, 3, "All w/ cwd: 3 directories") or diag explain \@files;
 
   $rule->skip_dirs(qw/data/);
   @files = ();
-  @files = $rule->all();
-  is( scalar @files, 2, "All w/ prune: 2 directories");
+  @files = map { "$_" } $rule->all();
+  is( scalar @files, 2, "All w/ prune: 2 directories") or diag explain \@files;
 }
 
 done_testing;

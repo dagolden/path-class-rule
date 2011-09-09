@@ -17,7 +17,8 @@ use List::Util qw/first/;
 #--------------------------------------------------------------------------#
 
 sub new {
-  return bless { item_filter => sub {1} }, shift;
+  my $class = shift;
+  return bless { rules => [ sub {1} ] }, ref $class || $class;
 }
 
 sub add_helper {
@@ -28,7 +29,7 @@ sub add_helper {
     *$name = sub {
       my $self = shift;
       my $rule = $coderef->(@_);
-      $self->add_rule( $rule )
+      $self->and( $rule )
     };
   }
 }
@@ -37,16 +38,58 @@ sub add_helper {
 # object methods
 #--------------------------------------------------------------------------#
 
-sub add_rule {
-  my ($self, $rule) = @_;
-  # XXX rule must be coderef
-  if ( my $filter = $self->{item_filter} ) {
-    $self->{item_filter} = sub { $filter->(@_) && $rule->(@_) };
+sub clone {
+  my $self = shift;
+  return bless { %$self }, ref $self;
+}
+
+sub test {
+  my ($self, $item) = @_;
+  my $result;
+  for my $rule ( @{$self->{rules}} ) {
+    $result = $rule->($item);
+    return $result if ! $result; # want to shortcut but return "0 but true"
   }
-  else {
-    $self->{item_filter} = $rule;
+  return $result;
+}
+
+sub _rulify {
+  my ($self, $method, @args) = @_;
+  my @rules;
+  for my $arg ( @args ) {
+    my $rule;
+    if ( blessed($arg) && $arg->isa("Path::Class::arg") ) {
+      $rule = sub { $rule->test(@_) };
+    }
+    elsif ( ref($arg) eq 'CODE' ) {
+      $rule = $arg;
+    }
+    else {
+      Carp::croak("Argument to ->and() must be coderef or Path::Class::Rule")
+    }
+    push @rules, $rule
   }
+  return @rules
+}
+
+sub and {
+  my $self = shift;
+  push @{$self->{rules}}, $self->_rulify("and", @_);
   return $self;
+}
+
+sub or {
+  my $self = shift;
+  my @rules = $self->_rulify("or", @_);
+  return sub {
+    my $item = shift;
+    my $result;
+    for my $rule ( @rules ) {
+      $result = $rule->($item);
+      return $result if $result; # want to shortcut but return "0 but true"
+    }
+    return $result;
+  };
 }
 
 my %defaults = (
@@ -60,8 +103,6 @@ sub iter {
             : ref($_[-1]) && !blessed($_[-1]) ? pop : {};
   my $opts = { %defaults, %$args };
   my @queue = map { dir($_) } @_ ? @_ : '.';
-  my $filter = $self->{item_filter};
-  my $stash = $self->{stash};
   my %seen;
 
   return sub {
@@ -72,7 +113,9 @@ sub iter {
         redo LOOP if -l $item;
       }
       local $_ = $item;
-      my ($interest, $prune) = $filter->($item, $stash);
+      my $interest = $self->test($item);
+      my $prune = $interest && ! (0+$interest); # capture "0 but true"
+      $interest += 0;                           # then ignore "but true"
       if ($item->is_dir && ! $seen{$item}++ && ! $prune) {
         if ( $opts->{depthfirst} ) {
           my @next = sort $item->children;
@@ -120,7 +163,7 @@ my %complex_helpers = (
     my @patterns = map { _regexify($_) } @_;
     return sub {
       my $f = shift;
-      return (0,1) if $f->is_dir && first { $f =~ $_} @patterns;
+      return "0 but true" if $f->is_dir && first { $f =~ $_} @patterns;
       return 1;
     }
   },
@@ -176,11 +219,17 @@ some features of this one:
 
 =head2 C<all>
 
+=head2 C<clone>
+
 =head2 C<iter>
+
+=head2 C<test>
 
 =head1 RULES
 
-=head2 C<add_rule>
+=head2 C<and>
+
+=head2 C<or>
 
 =head2 C<is_file>
 
@@ -206,7 +255,7 @@ XXX talk about how to extend this with new rules/helpers, e.g.
     }
   );
 
-XXX talk about how to prune based on second return value
+XXX talk about how to prune with "0 but true"
 
 =head1 SEE ALSO
 
