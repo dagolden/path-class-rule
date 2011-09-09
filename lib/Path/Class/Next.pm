@@ -8,7 +8,8 @@ package Path::Class::Next;
 # Dependencies
 use autodie 2.00;
 use Path::Class;
-use Scalar::Util qw/blessed/;
+use Scalar::Util qw/blessed reftype/;
+use List::Util qw/first/;
 
 #--------------------------------------------------------------------------#
 # class methods
@@ -23,7 +24,11 @@ sub add_helper {
   $class = ref $class || $class;
   if ( ! $class->can($name) ) {
     no strict 'refs';
-    *$name = sub { $_[0]->add_rule( $coderef ) };
+    *$name = sub {
+      my $self = shift;
+      my $rule = $coderef->(@_);
+      $self->add_rule( $rule )
+    };
   }
 }
 
@@ -80,9 +85,23 @@ sub all {
 # common helpers
 #--------------------------------------------------------------------------#
 
+sub _regexify {
+  my $re = shift;
+  return ref($_) && reftype($_) eq 'REGEXP' ? $_ : qr/\b\Q$_\E\b/;
+}
+
 my %helpers = (
-  is_dir => sub { $_->is_dir },
-  is_file => sub { ! $_->is_dir },
+  is_dir => sub { return sub { $_->is_dir } },
+  is_file => sub { return sub { ! $_->is_dir } },
+  skip_dirs => sub {
+    my @patterns = map { _regexify($_) } @_;
+    return sub {
+      my $f = shift;
+      return (0,1) if $f->is_dir && first { $f =~ $_} @patterns;
+      return 1;
+    }
+  },
+
 );
 
 while ( my ($k,$v) = each %helpers ) {

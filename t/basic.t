@@ -48,6 +48,10 @@ use Path::Class::Next;
   @files = $rule->all();
   is( scalar @files, 3, "All w/ cwd: 3 directories");
 
+  $rule->skip_dirs(qw/data/);
+  @files = ();
+  @files = $rule->all();
+  is( scalar @files, 2, "All w/ prune: 2 directories");
 }
 
 done_testing;
