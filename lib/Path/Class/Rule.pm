@@ -206,12 +206,13 @@ features/deficiencies, depending on one's preferences and needs.  Here are
 some features of this one:
 
 =for :list
-* uses iterators
+* uses (lazy) iterators
 * returns L<Path::Class> objects
 * custom rules are given L<Path::Class> objects
 * breadth-first (default) or pre- or post-order depth-first
 * follows symlinks (by default, but can be disabled)
 * provides an API for extensions
+* doesn't chdir during operation
 
 =head1 USAGE
 
@@ -259,7 +260,28 @@ XXX talk about how to prune with "0 but true"
 
 =head1 SEE ALSO
 
+Here is an (incomplete) list of alternatives, with some comparison commentary.
 
+XXX should I make a table of features by module?  maybe.
+
+=head2 File::Find based modules
+
+L<File::Find> is part of the Perl core.  It requires the user to write a
+callback function to process each node of the search.  Callbacks must use
+global variables to determine the current node.  It only supports depth-first
+search (both pre- and post-order). It supports pre- and post-processing
+callbacks; the former is required for sorting files to process in a directory.
+
+L<File::Find::Rule> is an object-oriented wrapper around L<File::Find>.  It
+provides a number of helper functions and there are many more
+C<File::Find::Rule::*> modules on CPAN with additional helpers.  It provides
+an iterator interface, but precomputes all the results.
+
+=head2 Path::Class based modules
+
+=head2 File::Next
+
+=head2 File::Find::Node
 =for :list
 * L<File::Find>
 * L<File::Find::Node>
