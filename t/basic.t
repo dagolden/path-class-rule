@@ -9,7 +9,7 @@ use File::pushd qw/pushd/;
 use lib 't/lib';
 use PCNTest;
 
-use Path::Class::Next;
+use Path::Class::Rule;
 
 #--------------------------------------------------------------------------#
 
@@ -20,7 +20,7 @@ use Path::Class::Next;
   ));
 
   my ($iter, @files);
-  my $rule = Path::Class::Next->new->is_file;
+  my $rule = Path::Class::Rule->new->is_file;
 
   $iter = $rule->iter($td);
 
@@ -36,7 +36,7 @@ use Path::Class::Next;
 
   is( scalar @files, 1, "All: one file");
 
-  $rule = Path::Class::Next->new->is_dir;
+  $rule = Path::Class::Rule->new->is_dir;
   @files = ();
   @files = $rule->all($td);
 

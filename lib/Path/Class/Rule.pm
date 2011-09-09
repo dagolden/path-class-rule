@@ -2,7 +2,7 @@ use 5.008001;
 use strict;
 use warnings;
 
-package Path::Class::Next;
+package Path::Class::Rule;
 # VERSION
 
 # Dependencies
@@ -110,7 +110,7 @@ while ( my ($k,$v) = each %helpers ) {
 
 1;
 
-# ABSTRACT: No abstract given for Path::Class::Next
+# ABSTRACT: No abstract given for Path::Class::Rule
 
 =for Pod::Coverage method_names_here
 
@@ -118,7 +118,7 @@ while ( my ($k,$v) = each %helpers ) {
 
 = SYNOPSIS
 
-  use Path::Class::Next;
+  use Path::Class::Rule;
 
 = DESCRIPTION
 
