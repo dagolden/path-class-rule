@@ -48,7 +48,7 @@ sub test {
   my $result;
   for my $rule ( @{$self->{rules}} ) {
     $result = $rule->($item);
-    return $result if ! $result; # want to shortcut but return "0 but true"
+    return $result if ! (0+$result); # want to shortcut on "0 but true"
   }
   return $result;
 }
@@ -86,7 +86,7 @@ sub or {
     my $result;
     for my $rule ( @rules ) {
       $result = $rule->($item);
-      return $result if $result; # want to shortcut but return "0 but true"
+      return $result if $result; # want to shortcut on "0 but true"
     }
     return $result;
   };
