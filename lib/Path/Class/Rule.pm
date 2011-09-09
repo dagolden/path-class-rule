@@ -109,9 +109,12 @@ sub _regexify {
   return ref($_) && reftype($_) eq 'REGEXP' ? $_ : qr/\b\Q$_\E\b/;
 }
 
-my %helpers = (
-  is_dir => sub { return sub { $_->is_dir } },
-  is_file => sub { return sub { ! $_->is_dir } },
+my %simple_helpers = (
+  is_dir => sub { $_->is_dir },
+  is_file => sub { ! $_->is_dir },
+);
+
+my %complex_helpers = (
   skip_dirs => sub {
     my @patterns = map { _regexify($_) } @_;
     return sub {
@@ -120,11 +123,14 @@ my %helpers = (
       return 1;
     }
   },
-
 );
 
-while ( my ($k,$v) = each %helpers ) {
+while ( my ($k,$v) = each %complex_helpers ) {
   __PACKAGE__->add_helper( $k, $v );
+}
+
+while ( my ($k,$v) = each %simple_helpers ) {
+  __PACKAGE__->add_helper( $k, sub { return $v } );
 }
 
 1;
