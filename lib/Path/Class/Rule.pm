@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 package Path::Class::Rule;
+# ABSTRACT: File finder using Path::Class
 # VERSION
 
 # Dependencies
@@ -135,30 +136,88 @@ while ( my ($k,$v) = each %simple_helpers ) {
 
 1;
 
-# ABSTRACT: No abstract given for Path::Class::Rule
-
 =for Pod::Coverage method_names_here
 
-=begin wikidoc
-
-= SYNOPSIS
+=head1 SYNOPSIS
 
   use Path::Class::Rule;
 
-= DESCRIPTION
+  my $rule = Path::Class::Rule->new; # match anything
+  $rule->is_file->not_empty;         # add/chain rules
 
-This module might be cool, but you'd never know it from the lack
-of documentation.
+  # iterator interface
+  my $next = $rule->iter( @dirs, \%options);
+  while ( my $file = $next->() ) {
+    ...
+  }
 
-= USAGE
+  # list interface
+  for my $file ( $rule->all( @dirs, \%options ) {
+    ...
+  }
 
-Good luck!
+=head1 DESCRIPTION
 
-= SEE ALSO
+There are many other file finding modules out there.  They all have various
+features/deficiencies, depending on one's preferences and needs.  Here are
+some features of this one:
 
-Maybe other modules do related things.
+=for :list
+* uses iterators
+* returns L<Path::Class> objects
+* custom rules are given L<Path::Class> objects
+* breadth-first (default) or pre- or post-order depth-first
+* follows symlinks (by default, but can be disabled)
+* provides an API for extensions
 
-=end wikidoc
+=head1 USAGE
+
+=head2 C<new>
+
+=head2 C<all>
+
+=head2 C<iter>
+
+=head1 RULES
+
+=head2 C<add_rule>
+
+=head2 C<is_file>
+
+=head2 C<is_dir>
+
+=head2 C<skip_dirs>
+
+=head1 EXTENDING
+
+XXX talk about how to extend this with new rules/helpers, e.g.
+
+=head2 C<add_helper>
+
+  package Path::Class::Rule::Foo;
+  use Path::Class::Rule;
+  Path::Class::Rule->add_helper(
+    is_foo => sub {
+      my @args = @_; # can use to customize rule
+      return sub {
+        my ($item) = shift;
+        return $item->basename =~ /^foo$/;
+      }
+    }
+  );
+
+XXX talk about how to prune based on second return value
+
+=head1 SEE ALSO
+
+
+=for :list
+* L<File::Find>
+* L<File::Find::Node>
+* L<File::Find::Rule>
+* L<File::Finder>
+* L<File::Next>
+* L<Path::Class::Iterator>
 
 =cut
 
