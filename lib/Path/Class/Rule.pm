@@ -239,7 +239,7 @@ for my $name ( @stat_tests ) {
   use Path::Class::Rule;
 
   my $rule = Path::Class::Rule->new; # match anything
-  $rule->is_file->not_empty;         # add/chain rules
+  $rule->is_file->size(">10k");      # add/chain rules
 
   # iterator interface
   my $next = $rule->iter( @dirs, \%options);
@@ -271,19 +271,71 @@ some features of this one:
 
 =head2 C<new>
 
-=head2 C<all>
+  my $rule = Path::Class::Rule->new;
+
+Creates a new rule object that matches any file or directory.  It takes
+no arguments.
 
 =head2 C<clone>
 
+  my $rule2 = $rule1->clone;
+
+Creates a copy of a rule.
+
+=head2 C<all>
+
+  my @matches = $rule->all( @dir, \%options );
+
+Returns a list of L<Path::Class> objects that match the rule.  It takes
+as arguments a list of directories to search and an optional hash reference
+of control options.  If no search directories are provided, the current
+directory is used (C<".">).  Valid options include:
+
+=for :list
+* C<depthfirst> -- Controls order of results.  Valid values are "1"
+(post-order, depth-first search), "0" (breadth-first search) or
+"-1" (pre-order, depth-first search). Default is 0.  
+* C<follow_symlinks> -- Follow directory symlinks when true. Default is 1.
+
+Following symlinks may result in files be returned more than once;
+turning it off requires overhead of a stat call. Set this appropriate
+to your needs.
+
+B<Note>: each directory I<path> will only be entered once.  Due to symlinks,
+this could mean a physical directory is entered more than once.
+
+XXX Not yet protected against loops -- how do we do that?
+
 =head2 C<iter>
+
+  my $next = $rule->iter( @dirs, \%options);
+  while ( my $file = $next->() ) {
+    ...
+  }
+
+Creates a coderef iterator that returns a single L<Path::Class> object
+when dereferenced.  It takes the same arguments and has the same behaviors
+as the C<all> method.
+
+This iterator is "lazy" -- results are not pre-computed.  The C<all> method
+uses C<iter> internally to fetch all results.
 
 =head2 C<test>
 
+  if ( $rule->test( $path ) ) { ... }
+
+Test a file path against a rule.  Used internally, but provided should
+someone want to create their own, custom iteration routine.
+
 =head1 RULES
 
-=head2 C<and>
+XXX define what a rule is (i.e. coderef or another rule object)
 
-=head2 C<or>
+=head2 Logic rules
+
+XXX and, or, not (not implented)
+
+=head2 File type rules
 
 =head2 C<is_file>
 
