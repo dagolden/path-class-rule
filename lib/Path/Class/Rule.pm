@@ -160,7 +160,7 @@ sub _rulify {
 
 sub _regexify {
   my $re = shift;
-  return ref($_) && reftype($_) eq 'REGEXP' ? $_ : qr/\b\Q$_\E\b/;
+  return ref($_) && reftype($_) eq 'REGEXP' ? $_ : qr{/?\Q$_\E\z};
 }
 
 my %simple_helpers = (
