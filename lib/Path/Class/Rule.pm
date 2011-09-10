@@ -8,11 +8,13 @@ package Path::Class::Rule;
 
 # Dependencies
 use autodie 2.00;
+use namespace::autoclean;
 use Carp;
+use List::Util qw/first/;
 use Number::Compare;
 use Path::Class;
 use Scalar::Util qw/blessed reftype/;
-use List::Util qw/first/;
+use Text::Glob qw/glob_to_regex/;
 
 #--------------------------------------------------------------------------#
 # constructors and meta methods
@@ -114,7 +116,7 @@ sub or {
     my $item = shift;
     my $result;
     for my $rule ( @rules ) {
-      $result = $rule->($item);
+      $result = $rule->($item) || 0;
       return $result if $result; # want to shortcut on "0 but true"
     }
     return $result;
@@ -125,7 +127,7 @@ sub test {
   my ($self, $item) = @_;
   my $result;
   for my $rule ( @{$self->{rules}} ) {
-    $result = $rule->($item);
+    $result = $rule->($item) || 0;
     return $result if ! (0+$result); # want to shortcut on "0 but true"
   }
   return $result;
@@ -160,7 +162,7 @@ sub _rulify {
 
 sub _regexify {
   my $re = shift;
-  return ref($_) && reftype($_) eq 'REGEXP' ? $_ : qr{/?\Q$_\E\z};
+  return ref($_) && reftype($_) eq 'REGEXP' ? $_ : glob_to_regex($_);
 }
 
 my %simple_helpers = (
@@ -169,13 +171,21 @@ my %simple_helpers = (
 );
 
 my %complex_helpers = (
-  skip_dirs => sub {
+  name => sub {
     Carp::croak("No patterns provided to 'skip_dirs'") unless @_;
     my @patterns = map { _regexify($_) } @_;
     return sub {
       my $f = shift;
-      return "0 but true" if $f->is_dir && first { $f =~ $_} @patterns;
-      return 1;
+      return first { $f =~ $_} @patterns;
+    }
+  },
+  skip_dirs => sub {
+    Carp::croak("No patterns provided to 'skip_dirs'") unless @_;
+    my $name_check = Path::Class::Rule->new->name(@_);
+    return sub {
+      my $f = shift;
+      return "0 but true" if $f->is_dir && $name_check->test($f);
+      return 1; # otherwise, like a null rule
     }
   },
 );
