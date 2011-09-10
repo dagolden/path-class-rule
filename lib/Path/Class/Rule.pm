@@ -8,6 +8,8 @@ package Path::Class::Rule;
 
 # Dependencies
 use autodie 2.00;
+use Carp;
+use Number::Compare;
 use Path::Class;
 use Scalar::Util qw/blessed reftype/;
 use List::Util qw/first/;
@@ -168,6 +170,7 @@ my %simple_helpers = (
 
 my %complex_helpers = (
   skip_dirs => sub {
+    Carp::croak("No patterns provided to 'skip_dirs'") unless @_;
     my @patterns = map { _regexify($_) } @_;
     return sub {
       my $f = shift;
@@ -213,6 +216,19 @@ while ( my ($op,$name) = each %X_tests ) {
   __PACKAGE__->add_helper( "not_$name", sub { return $not_coderef } );
 }
 
+# stat tests adapted from File::Find::Rule
+my @stat_tests = qw(
+  dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
+);
+
+for my $name ( @stat_tests ) {
+  my $coderef = sub {
+    Carp::croak("The '$name' test requires a single argument") unless @_ == 1;
+    my $comparator = Number::Compare->new(shift);
+    return sub { return $comparator->($_->stat->$name) };
+  };
+  __PACKAGE__->add_helper( $name, $coderef );
+}
 
 1;
 
@@ -319,6 +335,7 @@ an iterator interface, but precomputes all the results.
 =head2 File::Next
 
 =head2 File::Find::Node
+
 =for :list
 * L<File::Find>
 * L<File::Find::Node>
