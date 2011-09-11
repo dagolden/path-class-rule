@@ -142,8 +142,8 @@ sub _rulify {
   my @rules;
   for my $arg ( @args ) {
     my $rule;
-    if ( blessed($arg) && $arg->isa("Path::Class::arg") ) {
-      $rule = sub { $rule->test(@_) };
+    if ( blessed($arg) && $arg->isa("Path::Class::Rule") ) {
+      $rule = sub { $arg->test(@_) };
     }
     elsif ( ref($arg) eq 'CODE' ) {
       $rule = $arg;
