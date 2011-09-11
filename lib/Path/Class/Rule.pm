@@ -176,7 +176,8 @@ my %complex_helpers = (
     my @patterns = map { _regexify($_) } @_;
     return sub {
       my $f = shift;
-      return first { $f =~ $_} @patterns;
+      my $name = $f->relative($f->parent);
+      return (first { $name =~ $_} @patterns ) ? 1 : 0;
     }
   },
   skip_dirs => sub {
