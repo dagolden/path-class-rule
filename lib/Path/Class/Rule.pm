@@ -124,6 +124,19 @@ sub or {
   return $self->and( $coderef );
 }
 
+sub not {
+  my $self = shift;
+  my @rules = $self->_rulify("not", @_);
+  my $obj = $self->new->and(@rules);
+  my $coderef = sub {
+    my $item = shift;
+    my $result = $obj->test($item);
+    # XXX what to do about "0 but true"? Ignore it?
+    return $result ? "0" : "1";
+  };
+  return $self->and( $coderef );
+}
+
 sub test {
   my ($self, $item) = @_;
   my $result;
@@ -345,7 +358,7 @@ XXX define what a rule is (i.e. coderef or another rule object)
 
 =head2 Logic rules
 
-XXX and, or, not (not implented)
+XXX and, or, not
 
 =head2 File type rules
 
