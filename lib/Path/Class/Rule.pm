@@ -295,22 +295,30 @@ some features of this one:
 * provides an API for extensions
 * doesn't chdir during operation
 
+The API is based heavily on L<File::Find::Rule> by Richard Clamp, but
+with clearer separation between rules as methods and options that influence
+how directories are searched.
+
 =head1 USAGE
 
-=head2 C<new>
+=head2 Constructors
+
+=head3 C<new>
 
   my $rule = Path::Class::Rule->new;
 
 Creates a new rule object that matches any file or directory.  It takes
 no arguments.
 
-=head2 C<clone>
+=head3 C<clone>
 
   my $rule2 = $rule1->clone;
 
 Creates a copy of a rule.
 
-=head2 C<all>
+=head2 Matching and iteration
+
+=head3 C<all>
 
   my @matches = $rule->all( @dir, \%options );
 
@@ -334,7 +342,7 @@ this could mean a physical directory is entered more than once.
 
 XXX Not yet protected against loops -- how do we do that?
 
-=head2 C<iter>
+=head3 C<iter>
 
   my $next = $rule->iter( @dirs, \%options);
   while ( my $file = $next->() ) {
@@ -348,30 +356,78 @@ as the C<all> method.
 This iterator is "lazy" -- results are not pre-computed.  The C<all> method
 uses C<iter> internally to fetch all results.
 
-=head2 C<test>
+=head3 C<test>
 
   if ( $rule->test( $path ) ) { ... }
 
 Test a file path against a rule.  Used internally, but provided should
 someone want to create their own, custom iteration routine.
 
-=head1 RULES
+=head2 Logic operations
 
-XXX define what a rule is (i.e. coderef or another rule object)
+=head3 C<and>
 
-=head2 Logic rules
+=head3 C<or>
 
-XXX and, or, not
+=head3 <not>
+
+=head1 RULE METHODS
+
+=head2 File name rules
+
+=head3 C<name>
 
 =head2 File type rules
 
-=head2 C<is_file>
+=head3 C<is_file>
 
-=head2 C<is_dir>
+=head3 C<is_dir>
 
-=head2 C<skip_dirs>
+=head2 File test rules
+
+   Test | Method               Test |  Method
+  ------|-------------        ------|----------------
+    -r  |  readable             -R  |  r_readable
+    -w  |  writeable            -W  |  r_writeable
+    -w  |  writable             -W  |  r_writable
+    -x  |  executable           -X  |  r_executable
+    -o  |  owned                -O  |  r_owned
+        |                           |
+    -e  |  exists               -f  |  file
+    -z  |  empty                -d  |  directory
+    -s  |  nonempty             -l  |  symlink
+        |                       -p  |  fifo
+    -u  |  setuid               -S  |  socket
+    -g  |  setgid               -b  |  block
+    -k  |  sticky               -c  |  character
+        |                       -t  |  tty
+    -M  |  modified                 |
+    -A  |  accessed             -T  |  ascii
+    -C  |  changed              -B  |  binary
+
+=head2 Stat test rules
+
+  dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
+
+XXX document how these are used with Number::Compare
+
+=head2 Special rules
+
+=head3 C<skip_dirs>
+
+  $rule->skip_dirs( @patterns );
+
+The C<skip_dir> method 
+
+=head2 Negated rules
+
+All rule methods have a negated form preceded by "not_".
+
+  $rule->not_name("foo.*")
 
 =head1 EXTENDING
+
+XXX define what a rule is (i.e. coderef or another rule object)
 
 XXX talk about how to extend this with new rules/helpers, e.g.
 
