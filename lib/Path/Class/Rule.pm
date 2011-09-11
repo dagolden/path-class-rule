@@ -112,7 +112,7 @@ sub and {
 sub or {
   my $self = shift;
   my @rules = $self->_rulify("or", @_);
-  return sub {
+  my $coderef = sub {
     my $item = shift;
     my $result;
     for my $rule ( @rules ) {
@@ -121,6 +121,7 @@ sub or {
     }
     return $result;
   };
+  return $self->and( $coderef );
 }
 
 sub test {
