@@ -270,13 +270,13 @@ for my $name ( @stat_tests ) {
   $rule->is_file->size(">10k");      # add/chain rules
 
   # iterator interface
-  my $next = $rule->iter( @dirs, \%options);
+  my $next = $rule->iter( @dirs );
   while ( my $file = $next->() ) {
     ...
   }
 
   # list interface
-  for my $file ( $rule->all( @dirs, \%options ) {
+  for my $file ( $rule->all( @dirs ) ) {
     ...
   }
 
@@ -295,9 +295,9 @@ some features of this one:
 * provides an API for extensions
 * doesn't chdir during operation
 
-The API is based heavily on L<File::Find::Rule> by Richard Clamp, but
-with clearer separation between rules as methods and options that influence
-how directories are searched.
+The API is based heavily on L<File::Find::Rule> by Richard Clamp, but with more
+explicit distinction between rules as methods and options that influence how
+directories are searched.
 
 =head1 USAGE
 
@@ -337,8 +337,13 @@ Following symlinks may result in files be returned more than once;
 turning it off requires overhead of a stat call. Set this appropriate
 to your needs.
 
-B<Note>: each directory I<path> will only be entered once.  Due to symlinks,
+B<Note>: each directory path will only be entered once.  Due to symlinks,
 this could mean a physical directory is entered more than once.
+
+The L<Path::Class> objects inspected and returned will be relative to the
+search directories provided.  If these are absolute, then the objects returned
+will have absolute paths.  If these are relative, then the objects returned
+will have relative paths.
 
 =head3 C<iter>
 
@@ -363,15 +368,28 @@ someone want to create their own, custom iteration routine.
 
 =head2 Logic operations
 
-XXX define what a rule is (i.e. coderef or another rule object)
+C<Path::Class::Rule> provides three logic operations for adding constraints
+to a rule object.  Constraints may be either a subroutine reference with
+specific semantics or another C<Path::Class::Rule> object.
 
-XXX talk about how to prune with "0 but true"
+A constraint subroutine gets a L<Path::Class> argument (which is also locally
+aliased into the C<$_> global variable).  It must return one of three values:
+
+=for :list
+* A true value -- indicates the constraint is satisfied
+* A false value -- indicates the constraint is not satisfied
+* "0 but true" -- a special return value that signals that a directory
+should not be searched recursively
+
+The C<0 but true> value will shortcut logic (it is treated as "true" for
+an "or" rule and "false" for an "and" rule.  It has no effect on files --
+it is equivalent to returning a false value.
 
 =head3 C<and>
 
 =head3 C<or>
 
-=head3 <not>
+=head3 C<not>
 
 =head1 RULE METHODS
 
