@@ -1,0 +1,6 @@
+TODO for Path::Class::Rule
+
+- improved method argument validation
+- what do we do about search directories that don't exist?
+- what do we do about dangling symlinks?
+
