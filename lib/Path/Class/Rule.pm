@@ -40,6 +40,11 @@ sub add_helper {
       my $rule = $coderef->(@_);
       $self->and( $rule )
     };
+    *{"not_$name"} = sub {
+      my $self = shift;
+      my $rule = $coderef->(@_);
+      $self->not( $rule )
+    };
   }
 }
 
@@ -236,9 +241,7 @@ my %X_tests = (
 
 while ( my ($op,$name) = each %X_tests ) {
   my $coderef = eval "sub { $op \$_ }";
-  my $not_coderef = eval "sub { ! $op \$_ }";
   __PACKAGE__->add_helper( $name, sub { return $coderef } );
-  __PACKAGE__->add_helper( "not_$name", sub { return $not_coderef } );
 }
 
 # stat tests adapted from File::Find::Rule
