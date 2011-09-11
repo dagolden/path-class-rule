@@ -340,8 +340,6 @@ to your needs.
 B<Note>: each directory I<path> will only be entered once.  Due to symlinks,
 this could mean a physical directory is entered more than once.
 
-XXX Not yet protected against loops -- how do we do that?
-
 =head3 C<iter>
 
   my $next = $rule->iter( @dirs, \%options);
@@ -364,6 +362,10 @@ Test a file path against a rule.  Used internally, but provided should
 someone want to create their own, custom iteration routine.
 
 =head2 Logic operations
+
+XXX define what a rule is (i.e. coderef or another rule object)
+
+XXX talk about how to prune with "0 but true"
 
 =head3 C<and>
 
@@ -427,9 +429,9 @@ All rule methods have a negated form preceded by "not_".
 
 =head1 EXTENDING
 
-XXX define what a rule is (i.e. coderef or another rule object)
-
-XXX talk about how to extend this with new rules/helpers, e.g.
+One of the strengths of L<File::Find::Rule> is the many CPAN modules
+that extend it.  C<Path::Class::Rule> provides the C<add_helper> method
+to support this.
 
 =head2 C<add_helper>
 
@@ -445,13 +447,26 @@ XXX talk about how to extend this with new rules/helpers, e.g.
     }
   );
 
-XXX talk about how to prune with "0 but true"
+The C<add_helper> method takes two arguments, a C<name> for a rule method
+and a closure-generating callback.
+
+An inverted "not_*" method is generated automatically.
+
+=head1 CAVEATS
+
+Some features are still unimplemented.
+
+=for :list
+* Loop detection
+* Taint mode support
+* Error handling callback
+* Depth limitations
+* Assorted L<File::Find::Rule> helper (e.g. C<grep>)
+* Extension class loading via C<import()>
 
 =head1 SEE ALSO
 
 Here is an (incomplete) list of alternatives, with some comparison commentary.
-
-XXX should I make a table of features by module?  maybe.
 
 =head2 File::Find based modules
 
@@ -460,6 +475,8 @@ callback function to process each node of the search.  Callbacks must use
 global variables to determine the current node.  It only supports depth-first
 search (both pre- and post-order). It supports pre- and post-processing
 callbacks; the former is required for sorting files to process in a directory.
+L<File::Find::Closures> can be used to help create a callback for
+L<File::Find>.
 
 L<File::Find::Rule> is an object-oriented wrapper around L<File::Find>.  It
 provides a number of helper functions and there are many more
@@ -468,17 +485,27 @@ an iterator interface, but precomputes all the results.
 
 =head2 Path::Class based modules
 
+L<Path::Class::Iterator> walks a directory structure with an iterator.  It is
+implemented as L<Path::Class> subclasses, which adds a degree of extra
+complexity. It takes a single callback to define "interesting" paths to return.
+The callback gets a L<Path::Class::Iterator::File> or
+L<Path::Class::Iterator::Dir> object for evaluation.
+
 =head2 File::Next
 
-=head2 File::Find::Node
+L<File::Next> provides iterators for file, directories or "everything".  It
+takes two callbacks, one to match files and one to decide which directories to
+descend.  It does not allow control over breadth/depth order, though it does
+provide means to sort files for processing within a directory. Like
+L<File::Find>, it requires callbacks to use global varaibles.
+
+=head2 Other modules
 
 =for :list
-* L<File::Find>
-* L<File::Find::Node>
-* L<File::Find::Rule>
-* L<File::Finder>
-* L<File::Next>
-* L<Path::Class::Iterator>
+* L<File::Find::Declare> - declarative helper rules; no iterator; Moose-based;
+no control over ordering or following symlinks
+* L<File::Find::Node> - no iterator; matching via callback; no control over
+ordering
 
 =cut
 
