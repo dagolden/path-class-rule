@@ -30,7 +30,7 @@ use Path::Class::Rule;
   @files = $rule->all($td);
   is( scalar @files, 2, "Any file") or diag explain \@files;
 
-  $rule = Path::Class::Rule->new->file->size(">0");
+  $rule = Path::Class::Rule->new->file->size(">0k");
   @files = ();
   @files = $rule->all($td);
   is( $files[0], $changes, "size > 0") or diag explain \@files;
