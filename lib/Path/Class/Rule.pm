@@ -282,22 +282,27 @@ for my $name ( @stat_tests ) {
 
 =head1 DESCRIPTION
 
-There are many other file finding modules out there.  They all have various
-features/deficiencies, depending on one's preferences and needs.  Here are
-some features of this one:
+This module iterates over files and directories to identify ones matching a
+user-defined set of rules.  The API is based heavily on L<File::Find::Rule>,
+but with more explicit distinction between matching rules and options that
+influence how directories are searched.
+
+Generally speaking, a C<Path::Class::Rule> object is a collection of rules
+(match criteria) with methods to add additional criteria.  Options that control
+directory traversal are given as arguments to the method that generates an
+iterator.
+
+Here is a summary of features for comparison to other file finding modules:
 
 =for :list
-* uses (lazy) iterators
+* provides many "helper" methods for specifying rules
+* offers (lazy) iterator and flattened list interfaces
 * returns L<Path::Class> objects
-* custom rules are given L<Path::Class> objects
-* breadth-first (default) or pre- or post-order depth-first
+* custom rules implemented with callbacks
+* breadth-first (default) or pre- or post-order depth-first searching
 * follows symlinks (by default, but can be disabled)
-* provides an API for extensions
 * doesn't chdir during operation
-
-The API is based heavily on L<File::Find::Rule> by Richard Clamp, but with more
-explicit distinction between rules as methods and options that influence how
-directories are searched.
+* provides an API for extensions
 
 =head1 USAGE
 
@@ -312,25 +317,33 @@ no arguments.
 
 =head3 C<clone>
 
-  my $rule2 = $rule1->clone;
+  my $common      = Path::Class::Rule->new->is_file->not_empty;
+  my $big_files   = $common->clone->size(">1MB");
+  my $small_files = $common->clone->size("<10K");
 
-Creates a copy of a rule.
+Creates a copy of a rule object.  Useful for customizing different
+rule objects against a common base.
 
 =head2 Matching and iteration
 
-=head3 C<all>
+=head3 C<iter>
 
-  my @matches = $rule->all( @dir, \%options );
+  my $next = $rule->iter( @dirs, \%options);
+  while ( my $file = $next->() ) {
+    ...
+  }
 
-Returns a list of L<Path::Class> objects that match the rule.  It takes
-as arguments a list of directories to search and an optional hash reference
-of control options.  If no search directories are provided, the current
-directory is used (C<".">).  Valid options include:
+Creates a coderef iterator that returns a single L<Path::Class> object when
+dereferenced.This iterator is "lazy" -- results are not pre-computed.
+
+It takes as arguments a list of directories to search and an optional hash
+reference of control options.  If no search directories are provided, the
+current directory is used (C<".">).  Valid options include:
 
 =for :list
 * C<depthfirst> -- Controls order of results.  Valid values are "1"
 (post-order, depth-first search), "0" (breadth-first search) or
-"-1" (pre-order, depth-first search). Default is 0.  
+"-1" (pre-order, depth-first search). Default is 0.
 * C<follow_symlinks> -- Follow directory symlinks when true. Default is 1.
 
 Following symlinks may result in files be returned more than once;
@@ -345,19 +358,13 @@ search directories provided.  If these are absolute, then the objects returned
 will have absolute paths.  If these are relative, then the objects returned
 will have relative paths.
 
-=head3 C<iter>
+=head3 C<all>
 
-  my $next = $rule->iter( @dirs, \%options);
-  while ( my $file = $next->() ) {
-    ...
-  }
+  my @matches = $rule->all( @dir, \%options );
 
-Creates a coderef iterator that returns a single L<Path::Class> object
-when dereferenced.  It takes the same arguments and has the same behaviors
-as the C<all> method.
-
-This iterator is "lazy" -- results are not pre-computed.  The C<all> method
-uses C<iter> internally to fetch all results.
+Returns a list of L<Path::Class> objects that match the rule.  It takes the
+same arguments and has the same behaviors as the C<iter> method.  The C<all>
+method uses C<iter> internally to fetch all results.
 
 =head3 C<test>
 
@@ -368,11 +375,11 @@ someone want to create their own, custom iteration routine.
 
 =head2 Logic operations
 
-C<Path::Class::Rule> provides three logic operations for adding constraints
-to a rule object.  Constraints may be either a subroutine reference with
-specific semantics or another C<Path::Class::Rule> object.
+C<Path::Class::Rule> provides three logic operations for adding rules to the
+object.  Rules may be either a subroutine reference with specific semantics
+(described below) or another C<Path::Class::Rule> object.
 
-A constraint subroutine gets a L<Path::Class> argument (which is also locally
+A rule subroutine gets a L<Path::Class> argument (which is also locally
 aliased into the C<$_> global variable).  It must return one of three values:
 
 =for :list
@@ -437,7 +444,7 @@ XXX document how these are used with Number::Compare
 
   $rule->skip_dirs( @patterns );
 
-The C<skip_dir> method 
+The C<skip_dir> method
 
 =head2 Negated rules
 
@@ -484,7 +491,9 @@ Some features are still unimplemented.
 
 =head1 SEE ALSO
 
-Here is an (incomplete) list of alternatives, with some comparison commentary.
+There are many other file finding modules out there.  They all have various
+features/deficiencies, depending on one's preferences and needs.  Here is an
+(incomplete) list of alternatives, with some comparison commentary.
 
 =head2 File::Find based modules
 
