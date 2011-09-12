@@ -6,6 +6,8 @@ Revision history for Path-Class-Rule
 
     - Added 'min_depth' and 'max_depth' rule methods
 
+    - Added 'dangling' rule method to match dangling symlinks
+
     - Rule callbacks receive a hash reference for storing optional state
 
   [BUG FIXES]

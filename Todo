@@ -2,6 +2,7 @@ TODO for Path::Class::Rule
 
 - improved method argument validation
 - what do we do about search directories that don't exist?
+- should directories be tested or automatically expanded?
 - custom sorting?
 - normalize paths to unix slashes?
 
