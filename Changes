@@ -2,6 +2,14 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [NEW FEATURES]
+
+    - Added 'min_depth' and 'max_depth' rule methods
+
+    - Rule callbacks receive a hash reference for storing optional state
+
+  [BUG FIXES]
+
     - Bumped Number::Compare prerequisite version to 0.02 to
       avoid uninitialized warnings when comparing numbers without
       a magnitude.

@@ -66,29 +66,32 @@ sub iter {
   my $args =  ref($_[0])  && !blessed($_[0])  ? shift
             : ref($_[-1]) && !blessed($_[-1]) ? pop : {};
   my $opts = { %defaults, %$args };
-  my @queue = map { dir($_) } @_ ? @_ : '.';
+  my @queue = map { { path => dir($_), depth => 0 } } @_ ? @_ : '.';
+  my $stash = {};
   my %seen;
 
   return sub {
     LOOP: {
-      my $item = shift @queue
+      my $task = shift @queue
         or return;
+      my ($item, $depth) = @{$task}{qw/path depth/};
       if ( ! $opts->{follow_symlinks} ) {
         redo LOOP if -l $item;
       }
       local $_ = $item;
-      my $interest = $self->test($item);
+      $stash->{_depth} = $depth;
+      my $interest = $self->test($item, $stash);
       my $prune = $interest && ! (0+$interest); # capture "0 but true"
       $interest += 0;                           # then ignore "but true"
       if ($item->is_dir && ! $seen{$item}++ && ! $prune) {
         if ( $opts->{depthfirst} ) {
-          my @next = sort $item->children;
-          push @next, $item if $opts->{depthfirst} < 0; # repeat for postorder
+          my @next = $self->_taskify($depth+1, $item->children);
+          push @next, $task if $opts->{depthfirst} < 0; # repeat for postorder
           unshift @queue, @next;
           redo LOOP if $opts->{depthfirst} < 0;
         }
         else {
-          push @queue, sort $item->children;
+          push @queue, $self->_taskify($depth+1, $item->children);
         }
       }
       return $item
@@ -147,10 +150,10 @@ sub not {
 }
 
 sub test {
-  my ($self, $item) = @_;
+  my ($self, $item, $stash) = @_;
   my $result;
   for my $rule ( @{$self->{rules}} ) {
-    $result = $rule->($item) || 0;
+    $result = $rule->($item, $stash) || 0;
     return $result if ! (0+$result); # want to shortcut on "0 but true"
   }
   return $result;
@@ -177,6 +180,11 @@ sub _rulify {
     push @rules, $rule
   }
   return @rules
+}
+
+sub _taskify {
+  my ($self, $depth, @paths) = @_;
+  return map { {path => $_, depth => $depth} } sort @paths;
 }
 
 #--------------------------------------------------------------------------#
@@ -216,6 +224,22 @@ my %complex_helpers = (
       my $f = shift;
       return "0 but true" if $f->is_dir && $name_check->test($f);
       return 1; # otherwise, like a null rule
+    }
+  },
+  min_depth => sub {
+    Carp::croak("No depth argument given to 'min_depth'") unless @_;
+    my $min_depth = 0 + shift; # if this warns, do here and not on every file
+    return sub {
+      my ($f, $stash) = @_;
+      return $stash->{_depth} >= $min_depth;
+    }
+  },
+  max_depth => sub {
+    Carp::croak("No depth argument given to 'max_depth'") unless @_;
+    my $max_depth = 0 + shift; # if this warns, do here and not on every file
+    return sub {
+      my ($f, $stash) = @_;
+      return $stash->{_depth} <= $max_depth ? 1 : "0 but true"; # prune
     }
   },
 );
@@ -394,21 +418,7 @@ someone want to create their own, custom iteration algorithm.
 
 C<Path::Class::Rule> provides three logic operations for adding rules to the
 object.  Rules may be either a subroutine reference with specific semantics
-(described below) or another C<Path::Class::Rule> object.
-
-A rule subroutine gets a L<Path::Class> argument (which is also locally
-aliased into the C<$_> global variable).  It must return one of three values:
-
-=for :list
-* A true value -- indicates the constraint is satisfied
-* A false value -- indicates the constraint is not satisfied
-* "0 but true" -- a special return value that signals that a directory should not be searched recursively
-
-The C<0 but true> value will shortcut logic (it is treated as "true" for an
-"or" rule and "false" for an "and" rule).  For a directory, it ensures that the
-directory will not be returned from the iterator and that its children will not
-be evaluated either.  It has no effect on files -- it is equivalent to
-returning a false value.
+(described below in L</EXTENDING>) or another C<Path::Class::Rule> object.
 
 =head3 C<and>
 
@@ -539,6 +549,15 @@ For example:
 
   $rule->size(">10K")
 
+=head2 Depth rules
+
+  $rule->min_depth(3);
+  $rule->max_depth(5);
+
+The C<min_depth> and C<max_depth> rule methods take a single argument
+and limit the paths returned to a minimum or maximum depth (respectively)
+from the starting search directory.
+
 =head2 Negated rules
 
 All rule methods have a negated form preceded by "not_".
@@ -550,16 +569,58 @@ C<not_nonempty> (which is thus a less efficient way of saying C<empty>).
 
 =head1 EXTENDING
 
+=head2 Custom rule subroutines
+
+Rules are implemented as (usually anonymous) subroutines callbacks that return
+a value indicating whether or not the rule matches.  These callbacks are called
+with two arguments.  The first argument is a L<Path::Class> object, which is
+also locally aliased as the C<$_> global variable for convenience in simple
+tests.
+
+  $rule->and( sub { -r -w -x $_ } ); # tests $_ 
+
+The second argument is a hash reference that can be used to maintain state.
+Keys beginning with an underscore are B<reserved> for C<Path::Class::Rule>
+to provide additional data about the search in progress.
+For example, the C<_depth> key is used to support minimum and maximum
+depth checks.
+
+The custom rule subroutine must return one of three values:
+
+=for :list
+* A true value -- indicates the constraint is satisfied
+* A false value -- indicates the constraint is not satisfied
+* "0 but true" -- a special return value that signals that a directory should not be searched recursively
+
+The C<0 but true> value will shortcut logic (it is treated as "true" for an
+"or" rule and "false" for an "and" rule).  For a directory, it ensures that the
+directory will not be returned from the iterator and that its children will not
+be evaluated either.  It has no effect on files -- it is equivalent to
+returning a false value.
+
+For example, this is equivalent to the "max_depth" rule method with
+a depth of 3:
+
+  $rule->and(
+    sub {
+      my ($path, $stash) = @_;
+      return $stash->{_depth} <= 3 ? 1 : "0 but true";
+    }
+  );
+
+Files of depth 4 will not be returned by the iterator; directories of depth
+4 will not be returned and will not be searched.
+
+=head2 Extension modules and custom rule methods
+
 One of the strengths of L<File::Find::Rule> is the many CPAN modules
 that extend it.  C<Path::Class::Rule> provides the C<add_helper> method
 to provide a similar mechanism for extensions.
 
-=head2 C<add_helper>
-
-The C<add_helper> method takes two arguments, a C<name> for the rule method and
-a closure-generating callback.  An inverted "not_*" method is generated
-automatically.  Extension classes should call this as a class method to
-install new rule methods.  For example, this adds a "foo" method that checks
+The C<add_helper> class method takes two arguments, a C<name> for the rule
+method and a closure-generating callback.  An inverted "not_*" method is
+generated automatically.  Extension classes should call this as a class method
+to install new rule methods.  For example, this adds a "foo" method that checks
 if the filename is "foo":
 
   package Path::Class::Rule::Foo;
@@ -595,7 +656,6 @@ API may still change.  Some features are still unimplemented:
 * True loop detection
 * Taint mode support
 * Error handling callback
-* Depth limitations
 * Assorted L<File::Find::Rule> helpers (e.g. C<grep>)
 * Extension class loading via C<import()>
 
