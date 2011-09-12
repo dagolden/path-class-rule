@@ -678,7 +678,6 @@ This is an early release for community feedback and contribution.  The
 API may still change.  Some features are still unimplemented:
 
 =for :list
-* True loop detection
 * Taint mode support
 * Error handling callback
 * Assorted L<File::Find::Rule> helpers (e.g. C<grep>)
@@ -695,8 +694,6 @@ There are many other file finding modules out there.  They all have various
 features/deficiencies, depending on one's preferences and needs.  Here is an
 (incomplete) list of alternatives, with some comparison commentary.
 
-=head2 File::Find
-
 L<File::Find> is part of the Perl core.  It requires the user to write a
 callback function to process each node of the search.  Callbacks must use
 global variables to determine the current node.  It only supports depth-first
@@ -705,14 +702,10 @@ callbacks; the former is required for sorting files to process in a directory.
 L<File::Find::Closures> can be used to help create a callback for
 L<File::Find>.
 
-=head2 File::Find::Rule
-
 L<File::Find::Rule> is an object-oriented wrapper around L<File::Find>.  It
 provides a number of helper functions and there are many more
 C<File::Find::Rule::*> modules on CPAN with additional helpers.  It provides
 an iterator interface, but precomputes all the results.
-
-=head2 File::Next
 
 L<File::Next> provides iterators for file, directories or "everything".  It
 takes two callbacks, one to match files and one to decide which directories to
@@ -720,20 +713,14 @@ descend.  It does not allow control over breadth/depth order, though it does
 provide means to sort files for processing within a directory. Like
 L<File::Find>, it requires callbacks to use global varaibles.
 
-=head2 Path::Class::Iterator
-
 L<Path::Class::Iterator> walks a directory structure with an iterator.  It is
 implemented as L<Path::Class> subclasses, which adds a degree of extra
 complexity. It takes a single callback to define "interesting" paths to return.
 The callback gets a L<Path::Class::Iterator::File> or
 L<Path::Class::Iterator::Dir> object for evaluation.
 
-=head2 File::Find::Declare
-
 L<File::Find::Declare> has declarative helper rules, no iterator, is
 Moose-based and offers no control over ordering or following symlinks.
-
-=head2 File::Find::Node
 
 L<File::Find::Node> has no iterator, does matching via callback and offers
 no control over ordering.
