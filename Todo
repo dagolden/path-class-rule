@@ -4,6 +4,7 @@ TODO for Path::Class::Rule
 - what do we do about search directories that don't exist?
 - what do we do about dangling symlinks?
 - custom sorting?
+- normalize paths to unix slashes?
 
 # rule helper ideas
 - iname (case-insensitive)
