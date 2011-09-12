@@ -33,7 +33,7 @@ sub add_helper {
   my ($class, $name, $coderef) = @_;
   $class = ref $class || $class;
   if ( ! $class->can($name) ) {
-    no strict 'refs';
+    no strict 'refs'; ## no critic
     *$name = sub {
       my $self = shift;
       my $rule = $coderef->(@_);
@@ -243,7 +243,7 @@ my %X_tests = (
 );
 
 while ( my ($op,$name) = each %X_tests ) {
-  my $coderef = eval "sub { $op \$_ }";
+  my $coderef = eval "sub { $op \$_ }"; ## no critic
   __PACKAGE__->add_helper( $name, sub { return $coderef } );
 }
 
@@ -254,7 +254,7 @@ my %time_tests = (
 );
 
 while ( my ($op,$name) = each %time_tests ) {
-  my $filetest = eval "sub { $op \$_ }";
+  my $filetest = eval "sub { $op \$_ }"; ## no critic
   my $coderef = sub {
     Carp::croak("The '$name' test requires a single argument") unless @_ == 1;
     my $comparator = Number::Compare->new(shift);
@@ -278,8 +278,6 @@ for my $name ( @stat_tests ) {
 }
 
 1;
-
-=for Pod::Coverage method_names_here
 
 =head1 SYNOPSIS
 
