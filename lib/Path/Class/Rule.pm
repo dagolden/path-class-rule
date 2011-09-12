@@ -388,15 +388,36 @@ aliased into the C<$_> global variable).  It must return one of three values:
 * "0 but true" -- a special return value that signals that a directory
 should not be searched recursively
 
-The C<0 but true> value will shortcut logic (it is treated as "true" for
-an "or" rule and "false" for an "and" rule.  It has no effect on files --
-it is equivalent to returning a false value.
+The C<0 but true> value will shortcut logic (it is treated as "true" for an
+"or" rule and "false" for an "and" rule.  For a directory, it ensures that not
+only will the directory not be returned to the iterator, but that its children
+will not be evaluated either. It has no effect on files -- it is equivalent to
+returning a false value.
 
 =head3 C<and>
 
+  $rule->and{ sub { -r -w -x $_ } }; # stacked filetest
+  $rule->and( @more_rules );
+
+Adds one or more constraints to the current rule.
+
 =head3 C<or>
 
+  $rule->or(
+    $rule->new->name("foo*"),
+    $rule->new->name("bar*"),
+    sub { -r -w -x $_ },
+  );
+
+Takes one or more alternatives and adds them as a constraint to the current
+rule. E.g. "old rule AND ( new1 OR new2 OR ... )".
+
 =head3 C<not>
+
+  $rule->not( sub { -r -w -x $_ } );
+
+Takes one or more alternatives and adds them as a negative constraint to
+the current rule. E.g. "old rule AND NOT ( new1 AND new2 AND ...)".
 
 =head1 RULE METHODS
 
