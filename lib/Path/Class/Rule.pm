@@ -284,7 +284,7 @@ for my $name ( @stat_tests ) {
   use Path::Class::Rule;
 
   my $rule = Path::Class::Rule->new; # match anything
-  $rule->is_file->size(">10k");      # add/chain rules
+  $rule->file->size(">10k");      # add/chain rules
 
   # iterator interface
   my $next = $rule->iter( @dirs );
@@ -302,12 +302,10 @@ for my $name ( @stat_tests ) {
 This module iterates over files and directories to identify ones matching a
 user-defined set of rules.  The API is based heavily on L<File::Find::Rule>,
 but with more explicit distinction between matching rules and options that
-influence how directories are searched.
-
-Generally speaking, a C<Path::Class::Rule> object is a collection of rules
-(match criteria) with methods to add additional criteria.  Options that control
-directory traversal are given as arguments to the method that generates an
-iterator.
+influence how directories are searched.  A C<Path::Class::Rule> object is a
+collection of rules (match criteria) with methods to add additional criteria.
+Options that control directory traversal are given as arguments to the method
+that generates an iterator.
 
 Here is a summary of features for comparison to other file finding modules:
 
@@ -330,11 +328,12 @@ Here is a summary of features for comparison to other file finding modules:
   my $rule = Path::Class::Rule->new;
 
 Creates a new rule object that matches any file or directory.  It takes
-no arguments.
+no arguments. For convenience, it may also be called on an object, in which
+case it still returns a new object hat matches any file or directory.
 
 =head3 C<clone>
 
-  my $common      = Path::Class::Rule->new->is_file->not_empty;
+  my $common      = Path::Class::Rule->new->file->not_empty;
   my $big_files   = $common->clone->size(">1MB");
   my $small_files = $common->clone->size("<10K");
 
@@ -359,9 +358,7 @@ reference of control options.  If no search directories are provided, the
 current directory is used (C<".">).  Valid options include:
 
 =for :list
-* C<depthfirst> -- Controls order of results.  Valid values are "1"
-(post-order, depth-first search), "0" (breadth-first search) or
-"-1" (pre-order, depth-first search). Default is 0.
+* C<depthfirst> -- Controls order of results.  Valid values are "1" (post-order, depth-first search), "0" (breadth-first search) or "-1" (pre-order, depth-first search). Default is 0.
 * C<follow_symlinks> -- Follow directory symlinks when true. Default is 1.
 
 Following symlinks may result in files be returned more than once;
@@ -403,8 +400,7 @@ aliased into the C<$_> global variable).  It must return one of three values:
 =for :list
 * A true value -- indicates the constraint is satisfied
 * A false value -- indicates the constraint is not satisfied
-* "0 but true" -- a special return value that signals that a directory
-should not be searched recursively
+* "0 but true" -- a special return value that signals that a directory should not be searched recursively
 
 The C<0 but true> value will shortcut logic (it is treated as "true" for an
 "or" rule and "false" for an "and" rule).  For a directory, it ensures that the
@@ -414,11 +410,11 @@ returning a false value.
 
 =head3 C<and>
 
-  $rule->and{ sub { -r -w -x $_ } }; # stacked filetest example
+  $rule->and( sub { -r -w -x $_ } ); # stacked filetest example
   $rule->and( @more_rules );
 
 Adds one or more constraints to the current rule. E.g. "old rule AND
-new1 AND new2 AND ...".
+new1 AND new2 AND ...".  Returns the object to allow method chaining.
 
 =head3 C<or>
 
@@ -429,16 +425,22 @@ new1 AND new2 AND ...".
   );
 
 Takes one or more alternatives and adds them as a constraint to the current
-rule. E.g. "old rule AND ( new1 OR new2 OR ... )".
+rule. E.g. "old rule AND ( new1 OR new2 OR ... )".  Returns the object to allow
+method chaining.
 
 =head3 C<not>
 
   $rule->not( sub { -r -w -x $_ } );
 
-Takes one or more alternatives and adds them as a negative constraint to
-the current rule. E.g. "old rule AND NOT ( new1 AND new2 AND ...)".
+Takes one or more alternatives and adds them as a negative constraint to the
+current rule. E.g. "old rule AND NOT ( new1 AND new2 AND ...)".  Returns the
+object to allow method chaining.
 
 =head1 RULE METHODS
+
+Rule methods are helpers that add constraints.  Internally, they generate a
+closure to accomplish the desired logic and add it to the rule object with the
+C<and> method.  Rule methods return the object to allow for method chaining.
 
 =head2 File name rules
 
@@ -450,6 +452,24 @@ the current rule. E.g. "old rule AND NOT ( new1 AND new2 AND ...)".
 The C<name> method takes one or more patterns and creates a rule that is true
 if any of the patterns match the B<basename> of the file or directory path.
 Patterns may be regular expressions or glob expressions (or literal names).
+
+=head3 C<skip_dirs>
+
+  $rule->skip_dirs( @patterns );
+
+The C<skip_dirs> method skips directories that match or or more patterns.
+Patterns may be regular expressions or globs (just like C<name>).  Directories
+that match will not be returned from the iterator and will be excluded from
+further search.
+
+B<Note:> this rule should be specified early so that it has a chance to
+operate before a logical shortcut.  E.g.
+
+  $rule->skip_dirs(".git")->file; # OK
+  $rule->file->skip_dirs(".git"); # Won't work
+
+In the latter case, when a ".git" directory is seen, the C<file> rule
+shortcuts the rule before the C<skip_dirs> rule has a chance to act.
 
 =head2 File test rules
 
@@ -517,26 +537,6 @@ For example:
 
   $rule->size(">10K")
 
-=head2 Special rules
-
-=head3 C<skip_dirs>
-
-  $rule->skip_dirs( @patterns );
-
-The C<skip_dirs> method skips directories that match or or more patterns.
-Patterns may be regular expressions or globs (just like C<name>).  Directories
-that match will not be returned from the iterator and will be excluded from
-further search.
-
-B<Note:> this rule should be specified early so that it has a chance to
-operate before a logical shortcut.  E.g.
-
-  $rule->skip_dirs(".git")->file; # OK
-  $rule->file->skip_dirs(".git"); # Won't work
-
-In the latter case, when a ".git" directory is seen, the C<file> rule
-shortcuts the rule before the C<skip_dirs> rule has a chance to act.
-
 =head2 Negated rules
 
 All rule methods have a negated form preceded by "not_".
@@ -550,7 +550,7 @@ C<not_nonempty> (which is thus a less efficient way of saying C<empty>).
 
 One of the strengths of L<File::Find::Rule> is the many CPAN modules
 that extend it.  C<Path::Class::Rule> provides the C<add_helper> method
-to support this.
+to provide a similar mechanism for extensions.
 
 =head2 C<add_helper>
 
@@ -594,7 +594,7 @@ API may still change.  Some features are still unimplemented:
 * Taint mode support
 * Error handling callback
 * Depth limitations
-* Assorted L<File::Find::Rule> helper (e.g. C<grep>)
+* Assorted L<File::Find::Rule> helpers (e.g. C<grep>)
 * Extension class loading via C<import()>
 
 Test coverage is still poor.
@@ -608,7 +608,7 @@ There are many other file finding modules out there.  They all have various
 features/deficiencies, depending on one's preferences and needs.  Here is an
 (incomplete) list of alternatives, with some comparison commentary.
 
-=head2 File::Find based modules
+=head2 File::Find
 
 L<File::Find> is part of the Perl core.  It requires the user to write a
 callback function to process each node of the search.  Callbacks must use
@@ -618,18 +618,12 @@ callbacks; the former is required for sorting files to process in a directory.
 L<File::Find::Closures> can be used to help create a callback for
 L<File::Find>.
 
+=head2 File::Find::Rule
+
 L<File::Find::Rule> is an object-oriented wrapper around L<File::Find>.  It
 provides a number of helper functions and there are many more
 C<File::Find::Rule::*> modules on CPAN with additional helpers.  It provides
 an iterator interface, but precomputes all the results.
-
-=head2 Path::Class based modules
-
-L<Path::Class::Iterator> walks a directory structure with an iterator.  It is
-implemented as L<Path::Class> subclasses, which adds a degree of extra
-complexity. It takes a single callback to define "interesting" paths to return.
-The callback gets a L<Path::Class::Iterator::File> or
-L<Path::Class::Iterator::Dir> object for evaluation.
 
 =head2 File::Next
 
@@ -639,13 +633,23 @@ descend.  It does not allow control over breadth/depth order, though it does
 provide means to sort files for processing within a directory. Like
 L<File::Find>, it requires callbacks to use global varaibles.
 
-=head2 Other modules
+=head2 Path::Class::Iterator
 
-=for :list
-* L<File::Find::Declare> - declarative helper rules; no iterator; Moose-based;
-no control over ordering or following symlinks
-* L<File::Find::Node> - no iterator; matching via callback; no control over
-ordering
+L<Path::Class::Iterator> walks a directory structure with an iterator.  It is
+implemented as L<Path::Class> subclasses, which adds a degree of extra
+complexity. It takes a single callback to define "interesting" paths to return.
+The callback gets a L<Path::Class::Iterator::File> or
+L<Path::Class::Iterator::Dir> object for evaluation.
+
+=head2 File::Find::Declare
+
+L<File::Find::Declare> has declarative helper rules, no iterator, is
+Moose-based and offers no control over ordering or following symlinks.
+
+=head2 File::Find::Node
+
+L<File::Find::Node> has no iterator, does matching via callback and offers
+no control over ordering.
 
 =cut
 
