@@ -46,6 +46,11 @@ sub add_helper {
       $self->not( $rule )
     };
   }
+  else {
+    Carp::carp(
+      "Can't add rule '$name' because it conflicts with an existing method"
+    );
+  }
 }
 
 #--------------------------------------------------------------------------#
@@ -498,11 +503,19 @@ to support this.
 
 =head2 C<add_helper>
 
+The C<add_helper> method takes two arguments, a C<name> for the rule method and
+a closure-generating callback.  An inverted "not_*" method is generated
+automatically.  Extension classes should call this as a class method to
+install new rule methods.  For example, this adds a "foo" method that checks
+if the filename is "foo":
+
   package Path::Class::Rule::Foo;
+
   use Path::Class::Rule;
+
   Path::Class::Rule->add_helper(
-    is_foo => sub {
-      my @args = @_; # can use to customize rule
+    foo => sub {
+      my @args = @_; # do this to customize closure with arguments
       return sub {
         my ($item) = shift;
         return $item->basename =~ /^foo$/;
@@ -510,10 +523,15 @@ to support this.
     }
   );
 
-The C<add_helper> method takes two arguments, a C<name> for a rule method
-and a closure-generating callback.
+  1;
 
-An inverted "not_*" method is generated automatically.
+This allows the following rule methods:
+
+  $rule->foo;
+  $fule->not_foo;
+
+The C<add_helper> method will warn and ignore a helper with the same name as
+an existing method.
 
 =head1 CAVEATS
 
