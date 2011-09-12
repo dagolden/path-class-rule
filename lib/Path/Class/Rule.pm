@@ -7,7 +7,6 @@ package Path::Class::Rule;
 # VERSION
 
 # Dependencies
-use autodie 2.00;
 use namespace::autoclean;
 use Carp;
 use List::Util qw/first/;
