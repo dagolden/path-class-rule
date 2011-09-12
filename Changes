@@ -2,6 +2,8 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+0.002     2011-09-12 14:17:13 America/New_York
+
   [NEW FEATURES]
 
     - Added 'min_depth' and 'max_depth' rule methods
