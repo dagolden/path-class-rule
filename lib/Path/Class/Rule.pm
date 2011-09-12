@@ -10,7 +10,7 @@ package Path::Class::Rule;
 use namespace::autoclean;
 use Carp;
 use List::Util qw/first/;
-use Number::Compare;
+use Number::Compare 0.02;
 use Path::Class;
 use Scalar::Util qw/blessed reftype/;
 use Text::Glob qw/glob_to_regex/;
