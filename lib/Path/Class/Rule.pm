@@ -353,8 +353,9 @@ rule objects against a common base.
     ...
   }
 
-Creates a coderef iterator that returns a single L<Path::Class> object when
-dereferenced.This iterator is "lazy" -- results are not pre-computed.
+Creates a subroutine reference iterator that returns a single L<Path::Class>
+object when dereferenced.  This iterator is "lazy" -- results are not
+pre-computed.
 
 It takes as arguments a list of directories to search and an optional hash
 reference of control options.  If no search directories are provided, the
@@ -391,7 +392,7 @@ method uses C<iter> internally to fetch all results.
   if ( $rule->test( $path ) ) { ... }
 
 Test a file path against a rule.  Used internally, but provided should
-someone want to create their own, custom iteration routine.
+someone want to create their own, custom iteration algorithm.
 
 =head2 Logic operations
 
@@ -409,17 +410,18 @@ aliased into the C<$_> global variable).  It must return one of three values:
 should not be searched recursively
 
 The C<0 but true> value will shortcut logic (it is treated as "true" for an
-"or" rule and "false" for an "and" rule.  For a directory, it ensures that not
-only will the directory not be returned to the iterator, but that its children
-will not be evaluated either. It has no effect on files -- it is equivalent to
+"or" rule and "false" for an "and" rule).  For a directory, it ensures that the
+directory will not be returned from the iterator and that its children will not
+be evaluated either.  It has no effect on files -- it is equivalent to
 returning a false value.
 
 =head3 C<and>
 
-  $rule->and{ sub { -r -w -x $_ } }; # stacked filetest
+  $rule->and{ sub { -r -w -x $_ } }; # stacked filetest example
   $rule->and( @more_rules );
 
-Adds one or more constraints to the current rule.
+Adds one or more constraints to the current rule. E.g. "old rule AND
+new1 AND new2 AND ...".
 
 =head3 C<or>
 
@@ -445,13 +447,17 @@ the current rule. E.g. "old rule AND NOT ( new1 AND new2 AND ...)".
 
 =head3 C<name>
 
-=head2 File type rules
+  $rule->name( "foo.txt" );
+  $rule->name( qr/foo/, "bar.*");
 
-=head3 C<is_file>
-
-=head3 C<is_dir>
+The C<name> method takes one or more patterns and creates a rule that is true
+if any of the patterns match the B<basename> of the file or directory path.
+Patterns may be regular expressions or glob expressions (or literal names).
 
 =head2 File test rules
+
+Most of the C<-X> style filetest are available as boolean rules.  The table
+below maps the filetest to its corresponding method name.
 
    Test | Method               Test |  Method
   ------|-------------        ------|----------------
@@ -462,24 +468,57 @@ the current rule. E.g. "old rule AND NOT ( new1 AND new2 AND ...)".
     -o  |  owned                -O  |  r_owned
         |                           |
     -e  |  exists               -f  |  file
-    -z  |  empty                -d  |  directory
+    -z  |  empty                -d  |  directory, dir
     -s  |  nonempty             -l  |  symlink
         |                       -p  |  fifo
     -u  |  setuid               -S  |  socket
     -g  |  setgid               -b  |  block
     -k  |  sticky               -c  |  character
         |                       -t  |  tty
-                    |
-                -T  |  ascii
-                -B  |  binary
+    -T  |  ascii
+    -B  |  binary
+
+For example:
+
+  $rule->file->nonempty; # -f -s $file
+
+The -X operators for timestamps take a single argument in a form that
+L<Number::Compare> can interpret.
+
+   Test | Method
+  ------|-------------
+    -A  |  accessed
+    -M  |  modified
+    -C  |  changed
+
+For example:
+
+  $rule->modified(">1"); # -M $file > 1
 
 =head2 Stat test rules
 
+All of the C<stat> elements have a method that takes a single argument in
+a form understood by L<Number::Compare>.
+
+  stat()  |  Method
+ --------------------
+       0  |  dev
+       1  |  ino
+       2  |  mode
+       3  |  nlink
+       4  |  uid
+       5  |  gid
+       6  |  rdev
+       7  |  size
+       8  |  atime
+       9  |  mtime
+      10  |  ctime
+      11  |  blksize
+      12  |  blocks
+
+For example:
+
   $rule->size(">10K")
-
-  dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
-
-XXX document how these are used with Number::Compare
 
 =head2 Special rules
 
@@ -487,13 +526,28 @@ XXX document how these are used with Number::Compare
 
   $rule->skip_dirs( @patterns );
 
-The C<skip_dir> method
+The C<skip_dirs> method skips directories that match or or more patterns.
+Patterns may be regular expressions or globs (just like C<name>).  Directories
+that match will not be returned from the iterator and will be excluded from
+further search.
+
+B<Note:> this rule should be specified early so that it has a chance to
+operate before a logical shortcut.  E.g.
+
+  $rule->skip_dirs(".git")->file; # OK
+  $rule->file->skip_dirs(".git"); # Won't work
+
+In the latter case, when a ".git" directory is seen, the C<file> rule
+shortcuts the rule before the C<skip_dirs> rule has a chance to act.
 
 =head2 Negated rules
 
 All rule methods have a negated form preceded by "not_".
 
   $rule->not_name("foo.*")
+
+Because this happens automatically, it includes somewhat silly ones like
+C<not_nonempty> (which is thus a less efficient way of saying C<empty>).
 
 =head1 EXTENDING
 
@@ -535,15 +589,21 @@ an existing method.
 
 =head1 CAVEATS
 
-Some features are still unimplemented.
+This is an early release for community feedback and contribution.  The
+API may still change.  Some features are still unimplemented:
 
 =for :list
-* Loop detection
+* True loop detection
 * Taint mode support
 * Error handling callback
 * Depth limitations
 * Assorted L<File::Find::Rule> helper (e.g. C<grep>)
 * Extension class loading via C<import()>
+
+Test coverage is still poor.
+
+Filetest operators and stat rules are subject to the usual portability
+considerations.  See L<perlport> for details.
 
 =head1 SEE ALSO
 
