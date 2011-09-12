@@ -188,11 +188,17 @@ sub _regexify {
   return ref($_) && reftype($_) eq 'REGEXP' ? $_ : glob_to_regex($_);
 }
 
+# "simple" helpers take no arguments
 my %simple_helpers = (
   # use Path::Class::is_dir instead of extra -d call
   map { $_ => sub { $_->is_dir } } qw/dir directory/,
 );
 
+while ( my ($k,$v) = each %simple_helpers ) {
+  __PACKAGE__->add_helper( $k, sub { return $v } );
+}
+
+# "complex" helpers take arguments
 my %complex_helpers = (
   name => sub {
     Carp::croak("No patterns provided to 'skip_dirs'") unless @_;
@@ -216,10 +222,6 @@ my %complex_helpers = (
 
 while ( my ($k,$v) = each %complex_helpers ) {
   __PACKAGE__->add_helper( $k, $v );
-}
-
-while ( my ($k,$v) = each %simple_helpers ) {
-  __PACKAGE__->add_helper( $k, sub { return $v } );
 }
 
 # X_tests adapted from File::Find::Rule
