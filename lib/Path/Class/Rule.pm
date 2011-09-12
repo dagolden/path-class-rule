@@ -227,21 +227,36 @@ my %X_tests = (
     -o  =>  owned              =>  -O  =>  r_owned         =>
 
     -e  =>  exists             =>  -f  =>  file            =>
-    -z  =>  empty              =>  -d  =>  directory       =>
+    -z  =>  empty              => # -d implemented above using is_dir
     -s  =>  nonempty           =>  -l  =>  symlink         =>
                                =>  -p  =>  fifo            =>
     -u  =>  setuid             =>  -S  =>  socket          =>
     -g  =>  setgid             =>  -b  =>  block           =>
     -k  =>  sticky             =>  -c  =>  character       =>
                                =>  -t  =>  tty             =>
-    -M  =>  modified                                       =>
-    -A  =>  accessed           =>  -T  =>  ascii           =>
-    -C  =>  changed            =>  -B  =>  binary          =>
+    -T  =>  ascii              =>
+    -B  =>  binary             =>
 );
 
 while ( my ($op,$name) = each %X_tests ) {
   my $coderef = eval "sub { $op \$_ }";
   __PACKAGE__->add_helper( $name, sub { return $coderef } );
+}
+
+my %time_tests = (
+    -A  => accessed =>
+    -M  => modified =>
+    -C  => changed  =>
+);
+
+while ( my ($op,$name) = each %time_tests ) {
+  my $filetest = eval "sub { $op \$_ }";
+  my $coderef = sub {
+    Carp::croak("The '$name' test requires a single argument") unless @_ == 1;
+    my $comparator = Number::Compare->new(shift);
+    return sub { return $comparator->($filetest->()) };
+  };
+  __PACKAGE__->add_helper( $name, $coderef );
 }
 
 # stat tests adapted from File::Find::Rule
@@ -449,11 +464,13 @@ the current rule. E.g. "old rule AND NOT ( new1 AND new2 AND ...)".
     -g  |  setgid               -b  |  block
     -k  |  sticky               -c  |  character
         |                       -t  |  tty
-    -M  |  modified                 |
-    -A  |  accessed             -T  |  ascii
-    -C  |  changed              -B  |  binary
+                    |
+                -T  |  ascii
+                -B  |  binary
 
 =head2 Stat test rules
+
+  $rule->size(">10K")
 
   dev ino mode nlink uid gid rdev size atime mtime ctime blksize blocks
 
