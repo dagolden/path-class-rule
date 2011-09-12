@@ -5,6 +5,7 @@ TODO for Path::Class::Rule
 - should directories be tested or automatically expanded?
 - custom sorting?
 - normalize paths to unix slashes?
+- memoize Path::Class::stat for duration of test()?
 
 # rule helper ideas
 - iname (case-insensitive)
