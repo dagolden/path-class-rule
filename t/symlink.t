@@ -41,7 +41,6 @@ plan skip_all => "No symlink support"
     cccc/dddd.txt
     cccc/eeee
     pppp/ffff.txt
-    cccc/eeee/ffff.txt
   );
 
   my @nofollow = qw(
@@ -124,6 +123,34 @@ plan skip_all => "No symlink support"
   cmp_deeply( \@files, \@valid_symlinks, "Only non-dangling symlinks")
     or diag explain { got => \@files, expected => \@valid_symlinks };
 
+}
+
+{
+  my @tree = qw(
+    aaaa.txt
+    bbbb.txt
+    cccc/dddd.txt
+  );
+
+  my $td = make_tree(@tree);
+
+  symlink dir($td,'cccc'), dir($td,'cccc','eeee'); # symlink loop
+
+  my @expected = qw(
+    .
+    aaaa.txt
+    bbbb.txt
+    cccc
+    cccc/dddd.txt
+    cccc/eeee
+  );
+
+  my ($rule, @files);
+
+  $rule = Path::Class::Rule->new;
+  @files = map  { $_->relative($td)->stringify } $rule->all($td);
+  cmp_deeply( \@files, \@expected, "Symlink loop")
+    or diag explain { got => \@files, expected => \@expected };
 }
 
 done_testing;

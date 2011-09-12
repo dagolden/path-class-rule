@@ -8,6 +8,9 @@ Revision history for Path-Class-Rule
 
     - Added 'dangling' rule method to match dangling symlinks
 
+    - Added 'loop_safe' option to control infinite loop protection
+      (default is true)
+
     - Rule callbacks receive a hash reference for storing optional state
 
   [BUG FIXES]

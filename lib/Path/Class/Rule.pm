@@ -57,8 +57,9 @@ sub add_helper {
 #--------------------------------------------------------------------------#
 
 my %defaults = (
-  follow_symlinks => 1,
   depthfirst => 0,
+  follow_symlinks => 1,
+  loop_safe => ( $^O eq 'MSWin32' ? 0 : 1 ), # No inode #'s on Windows
 );
 
 sub iter {
@@ -83,7 +84,15 @@ sub iter {
       my $interest = $self->test($item, $stash);
       my $prune = $interest && ! (0+$interest); # capture "0 but true"
       $interest += 0;                           # then ignore "but true"
-      if ($item->is_dir && ! $seen{$item}++ && ! $prune) {
+      my $unique_id;
+      if ($opts->{loop_safe}) {
+        my $st = $item->stat || $item->lstat;
+        $unique_id = join(",", $st->dev, $st->ino);
+      }
+      else {
+        $unique_id = $item;
+      }
+      if ($item->is_dir && ! $seen{$unique_id}++ && ! $prune) {
         if ( $opts->{depthfirst} ) {
           my @next = $self->_taskify($depth+1, $item->children);
           push @next, $task if $opts->{depthfirst} < 0; # repeat for postorder
@@ -343,6 +352,7 @@ Here is a summary of features for comparison to other file finding modules:
 * custom rules implemented with callbacks
 * breadth-first (default) or pre- or post-order depth-first searching
 * follows symlinks (by default, but can be disabled)
+* directories visited only once (no infinite loops)
 * doesn't chdir during operation
 * provides an API for extensions
 
@@ -387,13 +397,16 @@ current directory is used (C<".">).  Valid options include:
 =for :list
 * C<depthfirst> -- Controls order of results.  Valid values are "1" (post-order, depth-first search), "0" (breadth-first search) or "-1" (pre-order, depth-first search). Default is 0.
 * C<follow_symlinks> -- Follow directory symlinks when true. Default is 1.
+* C<loop_safe> -- Prevents visiting the same directory more than once when true.  Default is 1.
 
-Following symlinks may result in files be returned more than once;
-turning it off requires overhead of a stat call. Set this appropriate
-to your needs.
-
-B<Note>: each directory path will only be entered once.  Due to symlinks,
-this could mean a physical directory is entered more than once.
+Filesystem loops might exist from either hard or soft links.  The C<loop_safe>
+option prevents infinite loops, but adds some overhead by making C<stat> calls.
+Because directories are visited only once when C<loop_safe> is true, matches
+could come from a symlinked directory before the real directory depending on
+the search order.  To get only the real files, turn off C<follow_symlinks>.
+Turning C<loop_safe> off and leaving C<follow_symlinks> on avoids C<stat> calls
+and will be fastest, but with the risk of an infinite loop and repeated files.
+The default is slow, but safe.
 
 The L<Path::Class> objects inspected and returned will be relative to the
 search directories provided.  If these are absolute, then the objects returned
@@ -589,7 +602,7 @@ with two arguments.  The first argument is a L<Path::Class> object, which is
 also locally aliased as the C<$_> global variable for convenience in simple
 tests.
 
-  $rule->and( sub { -r -w -x $_ } ); # tests $_ 
+  $rule->and( sub { -r -w -x $_ } ); # tests $_
 
 The second argument is a hash reference that can be used to maintain state.
 Keys beginning with an underscore are B<reserved> for C<Path::Class::Rule>
