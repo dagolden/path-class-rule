@@ -27,7 +27,7 @@ my $td = make_tree(@tree);
 
 {
   my @files;
-  my $rule = Path::Class::Rule->new->is_file->not_name("gggg.txt");
+  my $rule = Path::Class::Rule->new->file->not_name("gggg.txt");
   my $expected = [ qw(
     aaaa.txt
     bbbb.txt
@@ -41,7 +41,7 @@ my $td = make_tree(@tree);
 
 {
   my @files;
-  my $rule = Path::Class::Rule->new->is_file;
+  my $rule = Path::Class::Rule->new->file;
   $rule->or(
     $rule->new->name("gggg.txt"),
     $rule->new->name("bbbb.txt"),

@@ -20,7 +20,7 @@ use Path::Class::Rule;
   ));
 
   my ($iter, @files);
-  my $rule = Path::Class::Rule->new->is_file;
+  my $rule = Path::Class::Rule->new->file;
 
   $iter = $rule->iter($td);
 
@@ -36,7 +36,7 @@ use Path::Class::Rule;
 
   is( scalar @files, 1, "All: one file") or diag explain \@files;
 
-  $rule = Path::Class::Rule->new->is_dir;
+  $rule = Path::Class::Rule->new->dir;
   @files = ();
   @files = map { "$_" } $rule->all($td);
 

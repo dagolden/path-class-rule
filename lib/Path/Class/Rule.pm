@@ -185,8 +185,8 @@ sub _regexify {
 }
 
 my %simple_helpers = (
-  is_dir => sub { $_->is_dir },
-  is_file => sub { ! $_->is_dir },
+  # use Path::Class::is_dir instead of extra -d call
+  map { $_ => sub { $_->is_dir } } qw/dir directory/,
 );
 
 my %complex_helpers = (

@@ -25,17 +25,17 @@ use Path::Class::Rule;
   # chmod a-rwx
   chmod 0777, $file;
 
-  $rule = Path::Class::Rule->new->is_file;
+  $rule = Path::Class::Rule->new->file;
   @files = ();
   @files = $rule->all($td);
   is( scalar @files, 1, "Any file") or diag explain \@files;
 
-  $rule = Path::Class::Rule->new->is_file->readable;
+  $rule = Path::Class::Rule->new->file->readable;
   @files = ();
   @files = $rule->all($td);
   is( scalar @files, 1, "readable") or diag explain \@files;
 
-  $rule = Path::Class::Rule->new->is_file->not_readable;
+  $rule = Path::Class::Rule->new->file->not_readable;
   @files = ();
   @files = $rule->all($td);
   is( scalar @files, 0, "not_readable") or diag explain \@files;

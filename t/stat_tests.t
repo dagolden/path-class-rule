@@ -24,13 +24,13 @@ use Path::Class::Rule;
   my $changes = file($td, 'data', 'Changes');
   copy( file('Changes'), $changes );
   
-  $rule = Path::Class::Rule->new->is_file;
+  $rule = Path::Class::Rule->new->file;
 
   @files = ();
   @files = $rule->all($td);
   is( scalar @files, 2, "Any file") or diag explain \@files;
 
-  $rule = Path::Class::Rule->new->is_file->size(">0");
+  $rule = Path::Class::Rule->new->file->size(">0");
   @files = ();
   @files = $rule->all($td);
   is( $files[0], $changes, "size > 0") or diag explain \@files;
