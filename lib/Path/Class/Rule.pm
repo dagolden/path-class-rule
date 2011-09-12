@@ -199,7 +199,8 @@ sub _regexify {
 # "simple" helpers take no arguments
 my %simple_helpers = (
   # use Path::Class::is_dir instead of extra -d call
-  map { $_ => sub { $_->is_dir } } qw/dir directory/,
+  ( map { $_ => sub { $_->is_dir } } qw/dir directory/ ),
+  dangling => sub { -l $_ && ! $_->stat },
 );
 
 while ( my ($k,$v) = each %simple_helpers ) {
@@ -557,6 +558,17 @@ For example:
 The C<min_depth> and C<max_depth> rule methods take a single argument
 and limit the paths returned to a minimum or maximum depth (respectively)
 from the starting search directory.
+
+=head2 Other rules
+
+=head3 C<dangling>
+
+  $rule->symlink->dangling;
+  $rule->not_dangling;
+
+The C<dangling> rule method matches dangling symlinks.  Use it or its inverse
+to control how dangling symlinks should be treated.  Note that a dangling
+symlink will be returned by the iterator as a L<Path::Class::File> object.
 
 =head2 Negated rules
 

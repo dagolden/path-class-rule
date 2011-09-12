@@ -75,5 +75,56 @@ plan skip_all => "No symlink support"
 
 }
 
+{
+  my @tree = qw(
+    aaaa.txt
+    bbbb.txt
+    cccc/dddd.txt
+  );
+
+  my $td = make_tree(@tree);
+
+  symlink dir($td,'zzzz'), dir($td,'pppp'); # dangling symlink
+  symlink dir($td,'cccc', 'dddd.txt'), dir($td,'qqqq.txt'); # regular symlink
+
+  my @dangling = qw(
+    pppp
+  );
+
+  my @not_dangling = qw(
+    .
+    aaaa.txt
+    bbbb.txt
+    cccc
+    qqqq.txt
+    cccc/dddd.txt
+  );
+
+  my @valid_symlinks = qw(
+    qqqq.txt
+  );
+
+  my ($rule, @files);
+
+  $rule = Path::Class::Rule->new->dangling;
+  @files = map  { $_->relative($td)->stringify }
+                $rule->all($td);
+  cmp_deeply( \@files, \@dangling, "Dangling symlinks")
+    or diag explain { got => \@files, expected => \@dangling };
+
+  $rule = Path::Class::Rule->new->not_dangling;
+  @files = map  { $_->relative($td)->stringify }
+                $rule->all($td);
+  cmp_deeply( \@files, \@not_dangling, "No dangling symlinks")
+    or diag explain { got => \@files, expected => \@not_dangling };
+
+  $rule = Path::Class::Rule->new->symlink->not_dangling;
+  @files = map  { $_->relative($td)->stringify }
+                $rule->all($td);
+  cmp_deeply( \@files, \@valid_symlinks, "Only non-dangling symlinks")
+    or diag explain { got => \@files, expected => \@valid_symlinks };
+
+}
+
 done_testing;
 # COPYRIGHT
