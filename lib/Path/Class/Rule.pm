@@ -30,7 +30,7 @@ sub clone {
 }
 
 sub add_helper {
-  my ($class, $name, $coderef) = @_;
+  my ($class, $name, $coderef, $skip_negation) = @_;
   $class = ref $class || $class;
   if ( ! $class->can($name) ) {
     no strict 'refs'; ## no critic
@@ -39,11 +39,13 @@ sub add_helper {
       my $rule = $coderef->(@_);
       $self->and( $rule )
     };
-    *{"not_$name"} = sub {
-      my $self = shift;
-      my $rule = $coderef->(@_);
-      $self->not( $rule )
-    };
+    if ( ! $skip_negation ) {
+      *{"not_$name"} = sub {
+        my $self = shift;
+        my $rule = $coderef->(@_);
+        $self->not( $rule )
+      };
+    }
   }
   else {
     Carp::carp(
@@ -227,15 +229,6 @@ my %complex_helpers = (
       return (first { $name =~ $_} @patterns ) ? 1 : 0;
     }
   },
-  skip_dirs => sub {
-    Carp::croak("No patterns provided to 'skip_dirs'") unless @_;
-    my $name_check = Path::Class::Rule->new->name(@_);
-    return sub {
-      my $f = shift;
-      return "0 but true" if $f->is_dir && $name_check->test($f);
-      return 1; # otherwise, like a null rule
-    }
-  },
   min_depth => sub {
     Carp::croak("No depth argument given to 'min_depth'") unless @_;
     my $min_depth = 0 + shift; # if this warns, do here and not on every file
@@ -257,6 +250,19 @@ my %complex_helpers = (
 while ( my ($k,$v) = each %complex_helpers ) {
   __PACKAGE__->add_helper( $k, $v );
 }
+
+# skip_dirs
+__PACKAGE__->add_helper(
+  skip_dirs => sub {
+    Carp::croak("No patterns provided to 'skip_dirs'") unless @_;
+    my $name_check = Path::Class::Rule->new->name(@_);
+    return sub {
+      my $f = shift;
+      return "0 but true" if $f->is_dir && $name_check->test($f);
+      return 1; # otherwise, like a null rule
+    }
+  } => 1 # don't create not_skip_dirs
+);
 
 # X_tests adapted from File::Find::Rule
 my %X_tests = (
@@ -312,6 +318,41 @@ for my $name ( @stat_tests ) {
   };
   __PACKAGE__->add_helper( $name, $coderef );
 }
+
+# VCS rules adapted from File::Find::Rule::VCS
+my %vcs_rules = (
+  skip_cvs => sub {
+    return Path::Class::Rule->new->skip_dirs('CVS')->not_name(qr/\.\#$/);
+  },
+  skip_rcs => sub {
+    return Path::Class::Rule->new->skip_dirs('RCS')->not_name(qr/,v$/);
+  },
+  skip_git => sub {
+    return Path::Class::Rule->new->skip_dirs('.git');
+  },
+  skip_svn => sub {
+    return Path::Class::Rule->new->skip_dirs(
+        ($^O eq 'MSWin32') ? ('.svn', '_svn') : ('.svn')
+    );
+  },
+  skip_bzr => sub {
+    return Path::Class::Rule->new->skip_dirs('.bzr');
+  },
+  skip_hg => sub {
+    return Path::Class::Rule->new->skip_dirs('.hg');
+  },
+  skip_vcs => sub {
+    return Path::Class::Rule->new
+      ->skip_dirs(qw/.git .bzr .hg CVS RCS/)
+      ->skip_svn
+      ->not_name(qr/\.\#$/, qr/,v$/);
+  },
+);
+
+while ( my ($name, $coderef) = each %vcs_rules ) {
+  __PACKAGE__->add_helper( $name, $coderef, 1 ); # don't create not_*
+}
+
 
 1;
 
@@ -572,6 +613,23 @@ The C<min_depth> and C<max_depth> rule methods take a single argument
 and limit the paths returned to a minimum or maximum depth (respectively)
 from the starting search directory.
 
+=head2 Version control file rules
+
+  # Skip all known VCS files
+  $rule->skip_vcs;
+
+  # Skip individual VCS files
+  $rule->skip_cvs;
+  $rule->skip_rcs;
+  $rule->skip_svn;
+  $rule->skip_git;
+  $rule->skip_bzr;
+  $rule->skip_hg;
+
+Skips files and/or prunes directories related to a version control system.
+Just like C<skip_dirs>, these rules should be specified early to get the
+correct behavior.
+
 =head2 Other rules
 
 =head3 C<dangling>
@@ -585,12 +643,15 @@ symlink will be returned by the iterator as a L<Path::Class::File> object.
 
 =head2 Negated rules
 
-All rule methods have a negated form preceded by "not_".
+Most rule methods have a negated form preceded by "not_".
 
   $rule->not_name("foo.*")
 
 Because this happens automatically, it includes somewhat silly ones like
 C<not_nonempty> (which is thus a less efficient way of saying C<empty>).
+
+Rules that skip directories or version control files do not have a negated
+version.
 
 =head1 EXTENDING
 
