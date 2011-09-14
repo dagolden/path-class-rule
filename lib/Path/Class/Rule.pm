@@ -610,8 +610,11 @@ object to allow method chaining.
 
 Takes one or more alternatives and will prune a directory if any of the
 criteria match.  For files, it is equivalent to
-C<$rule->not($rule->or(@rules))>.  Returns the object to allow method
+C<< $rule->not($rule->or(@rules)) >>.  Returns the object to allow method
 chaining.
+
+This method should be called as early as possible in the rule chain.
+See L</skip_dirs> below for further explanation and an example.
 
 =head1 RULE METHODS
 
@@ -837,6 +840,9 @@ a depth of 3:
 Files of depth 4 will not be returned by the iterator; directories of depth
 4 will not be returned and will not be searched.
 
+Generally, if you want to do directory pruning, you are encouraged to use the
+L</skip> method instead of writing your own logic using C<0 but true>.
+
 =head2 Extension modules and custom rule methods
 
 One of the strengths of L<File::Find::Rule> is the many CPAN modules
@@ -878,8 +884,8 @@ an existing method.
 =head1 LEXICAL WARNINGS
 
 If you run with lexical warnings enabled, C<Path::Class::Rule> will issue
-warnings for certain circumstances (such as a read-only directory that must be
-skipped).  To disable, these categories, put the following statement at the
+warnings in certain circumstances (such as a read-only directory that must be
+skipped).  To disable these categories, put the following statement at the
 correct scope:
 
   no warnings 'Path::Class::Rule';
@@ -893,8 +899,6 @@ Some features are still unimplemented:
 * Taint mode support
 * Some L<File::Find::Rule> helpers (e.g. C<grep>)
 * Extension class loading via C<import()>
-
-Test coverage is not great.
 
 Filetest operators and stat rules are subject to the usual portability
 considerations.  See L<perlport> for details.
