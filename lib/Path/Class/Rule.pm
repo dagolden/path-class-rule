@@ -565,7 +565,7 @@ Patterns may be regular expressions or glob expressions (or literal names).
 
   $rule->skip_dirs( @patterns );
 
-The C<skip_dirs> method skips directories that match or or more patterns.
+The C<skip_dirs> method skips directories that match one or more patterns.
 Patterns may be regular expressions or globs (just like C<name>).  Directories
 that match will not be returned from the iterator and will be excluded from
 further search.
