@@ -6,7 +6,9 @@ Revision history for Path-Class-Rule
 
   [NEW FEATURES]
 
-  - Added 'skip' logic method for easy custom pruning
+    - Added 'skip' logic method for easy custom pruning
+
+    - Added lexical warnings category
 
   [DOCUMENTATION]
 

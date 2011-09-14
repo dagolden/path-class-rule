@@ -6,6 +6,9 @@ package Path::Class::Rule;
 # ABSTRACT: File finder using Path::Class
 # VERSION
 
+# Register warnings category
+use warnings::register;
+
 # Dependencies
 use namespace::autoclean;
 use Carp;
@@ -825,6 +828,15 @@ This allows the following rule methods:
 
 The C<add_helper> method will warn and ignore a helper with the same name as
 an existing method.
+
+=head1 LEXICAL WARNINGS
+
+If you run with lexical warnings enabled, C<Path::Class::Rule> will issue
+warnings for certain circumstances (such as a read-only directory that must be
+skipped).  To disable, these categories, put the following statement at the
+correct scope:
+
+  no warnings 'Path::Class::Rule';
 
 =head1 CAVEATS
 
