@@ -18,6 +18,7 @@ use Number::Compare 0.02;
 use Path::Class;
 use Scalar::Util qw/blessed reftype/;
 use Text::Glob qw/glob_to_regex/;
+use Try::Tiny;
 
 #--------------------------------------------------------------------------#
 # constructors and meta methods
@@ -66,6 +67,7 @@ my %defaults = (
   depthfirst => 0,
   follow_symlinks => 1,
   loop_safe => ( $^O eq 'MSWin32' ? 0 : 1 ), # No inode #'s on Windows
+  error_handler => sub { die sprintf("%s: %s", @_) },
 );
 
 sub iter {
@@ -88,7 +90,9 @@ sub iter {
       }
       local $_ = $item;
       $stash->{_depth} = $depth;
-      my $interest = $self->test($item, $stash);
+      my $interest =
+        try   { $self->test($item, $stash) }
+        catch { $opts->{error_handler}->($item, $_) };
       my $prune = $interest && ! (0+$interest); # capture "0 but true"
       $interest += 0;                           # then ignore "but true"
       my $unique_id;
@@ -513,6 +517,7 @@ current directory is used (C<".">).  Valid options include:
 
 =for :list
 * C<depthfirst> -- Controls order of results.  Valid values are "1" (post-order, depth-first search), "0" (breadth-first search) or "-1" (pre-order, depth-first search). Default is 0.
+* C<error_handler> -- Catches errors during execution of rule tests. Default handler dies with the filename and error.
 * C<follow_symlinks> -- Follow directory symlinks when true. Default is 1.
 * C<loop_safe> -- Prevents visiting the same directory more than once when true.  Default is 1.
 
@@ -524,6 +529,11 @@ the search order.  To get only the real files, turn off C<follow_symlinks>.
 Turning C<loop_safe> off and leaving C<follow_symlinks> on avoids C<stat> calls
 and will be fastest, but with the risk of an infinite loop and repeated files.
 The default is slow, but safe.
+
+The C<error_handler> parameter must be a subroutine reference.  It will be
+called when a rule test throws an exception.  The first argument will be
+the L<Path::Class> object being inspected and the second argument will be
+the exception.
 
 The L<Path::Class> objects inspected and returned will be relative to the
 search directories provided.  If these are absolute, then the objects returned
