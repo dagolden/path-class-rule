@@ -402,7 +402,7 @@ while ( my ($name, $coderef) = each %perl_rules ) {
   use Path::Class::Rule;
 
   my $rule = Path::Class::Rule->new; # match anything
-  $rule->file->size(">10k");      # add/chain rules
+  $rule->file->size(">10k");         # add/chain rules
 
   # iterator interface
   my $next = $rule->iter( @dirs );
@@ -782,6 +782,7 @@ if the filename is "foo":
       my @args = @_; # do this to customize closure with arguments
       return sub {
         my ($item) = shift;
+        return if $item->is_dir;
         return $item->basename =~ /^foo$/;
       }
     }
