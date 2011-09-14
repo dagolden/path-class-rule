@@ -95,14 +95,7 @@ sub iter {
         catch { $opts->{error_handler}->($item, $_) };
       my $prune = $interest && ! (0+$interest); # capture "0 but true"
       $interest += 0;                           # then ignore "but true"
-      my $unique_id;
-      if ($opts->{loop_safe}) {
-        my $st = $item->stat || $item->lstat;
-        $unique_id = join(",", $st->dev, $st->ino);
-      }
-      else {
-        $unique_id = $item;
-      }
+      my $unique_id = $self->_unique_id($item, $opts);
       if ($item->is_dir && ! $seen{$unique_id}++ && ! $prune) {
         if ( ! -r $item ) {
             warnings::warnif("Directory '$item' is not readable. Skipping it");
@@ -225,6 +218,25 @@ sub _taskify {
   return map { {path => $_, depth => $depth} } sort @paths;
 }
 
+sub _unique_id {
+  my ($self, $item, $opts) = @_;
+  my $unique_id;
+  if ($opts->{loop_safe}) {
+    my $st = eval { $item->stat || $item->lstat };
+    if ( $st ) {
+      $unique_id = join(",", $st->dev, $st->ino);
+    }
+    else {
+      my $type = $item->is_dir ? 'directory' : 'file';
+      warnings::warnif("Could not stat $type '$item'");
+      $unique_id = $item;
+    }
+  }
+  else {
+    $unique_id = $item;
+  }
+  return $unique_id;
+}
 #--------------------------------------------------------------------------#
 # built-in helpers
 #--------------------------------------------------------------------------#
