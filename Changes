@@ -10,6 +10,11 @@ Revision history for Path-Class-Rule
 
     - Added lexical warnings category
 
+  [BUG FIXES]
+
+    - Directories that are not readable will warn and continue instead
+      of throwing an error
+
   [DOCUMENTATION]
 
     - Added additional modules to SEE ALSO commentary

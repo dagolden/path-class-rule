@@ -99,7 +99,10 @@ sub iter {
         $unique_id = $item;
       }
       if ($item->is_dir && ! $seen{$unique_id}++ && ! $prune) {
-        if ( $opts->{depthfirst} ) {
+        if ( ! -r $item ) {
+            warnings::warnif("Directory '$item' is not readable. Skipping it");
+        }
+        elsif ( $opts->{depthfirst} ) {
           my @next = $self->_taskify($depth+1, $item->children);
           # for postorder, requeue as reference to signal it can be returned
           # without being retested
