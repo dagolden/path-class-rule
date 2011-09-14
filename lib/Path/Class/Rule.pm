@@ -766,8 +766,9 @@ One of the strengths of L<File::Find::Rule> is the many CPAN modules
 that extend it.  C<Path::Class::Rule> provides the C<add_helper> method
 to provide a similar mechanism for extensions.
 
-The C<add_helper> class method takes two arguments, a C<name> for the rule
-method and a closure-generating callback.  An inverted "not_*" method is
+The C<add_helper> class method takes three arguments, a C<name> for the rule
+method, a closure-generating callback, and a flag for not generating a negated
+form of the rule.  Unless the flag is true, an inverted "not_*" method is
 generated automatically.  Extension classes should call this as a class method
 to install new rule methods.  For example, this adds a "foo" method that checks
 if the filename is "foo":
@@ -798,8 +799,8 @@ an existing method.
 
 =head1 CAVEATS
 
-This is an early release for community feedback and contribution.  The
-API may still change.  Some features are still unimplemented:
+This is an early release for community feedback and contribution.
+Some features are still unimplemented:
 
 =for :list
 * Taint mode support
@@ -807,7 +808,7 @@ API may still change.  Some features are still unimplemented:
 * Assorted L<File::Find::Rule> helpers (e.g. C<grep>)
 * Extension class loading via C<import()>
 
-Test coverage is still poor.
+Test coverage is poor.
 
 Filetest operators and stat rules are subject to the usual portability
 considerations.  See L<perlport> for details.
