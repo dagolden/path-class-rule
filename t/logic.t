@@ -53,5 +53,22 @@ my $td = make_tree(@tree);
     or diag explain { got => \@files, expected => $expected };
 }
 
+{
+  my @files;
+  my $rule = Path::Class::Rule->new;
+  $rule->skip(
+    $rule->new->name("gggg.txt"),
+    $rule->new->name("cccc"),
+  );
+  $rule->file;
+  my $expected = [qw(
+    aaaa.txt
+    bbbb.txt
+  )];
+  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  cmp_deeply( \@files, $expected, "skip() test")
+    or diag explain { got => \@files, expected => $expected };
+}
+
 done_testing;
 # COPYRIGHT

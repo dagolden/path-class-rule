@@ -160,6 +160,18 @@ sub not {
   return $self->and( $coderef );
 }
 
+sub skip {
+  my $self = shift;
+  my @rules = $self->_rulify("not", @_);
+  my $obj = $self->new->or(@rules);
+  my $coderef = sub {
+    my $item = shift;
+    my $result = $obj->test($item);
+    return $result ? "0 but true" : "1";
+  };
+  return $self->and( $coderef );
+}
+
 sub test {
   my ($self, $item, $stash) = @_;
   my $result;
@@ -543,6 +555,18 @@ method chaining.
 Takes one or more alternatives and adds them as a negative constraint to the
 current rule. E.g. "old rule AND NOT ( new1 AND new2 AND ...)".  Returns the
 object to allow method chaining.
+
+=head3 C<skip>
+
+  $rule->skip(
+    $rule->new->dir->not_writeable,
+    $rule->new->dir->name("foo"),
+  );
+
+Takes one or more alternatives and will prune a directory if any of the
+criteria match.  For files, it is equivalent to
+C<$rule->not($rule->or(@rules))>.  Returns the object to allow method
+chaining.
 
 =head1 RULE METHODS
 
