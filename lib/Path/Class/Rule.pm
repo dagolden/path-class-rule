@@ -78,6 +78,7 @@ sub iter {
       my $task = shift @queue
         or return;
       my ($item, $depth) = @{$task}{qw/path depth/};
+      return $$item if ref $item eq 'REF'; # deferred for postorder
       if ( ! $opts->{follow_symlinks} ) {
         redo LOOP if -l $item;
       }
@@ -97,7 +98,10 @@ sub iter {
       if ($item->is_dir && ! $seen{$unique_id}++ && ! $prune) {
         if ( $opts->{depthfirst} ) {
           my @next = $self->_taskify($depth+1, $item->children);
-          push @next, $task if $opts->{depthfirst} < 0; # repeat for postorder
+          # for postorder, requeue as reference to signal it can be returned
+          # without being retested
+          push @next, { path => \$item, depth => $depth}
+            if $opts->{depthfirst} < 0;
           unshift @queue, @next;
           redo LOOP if $opts->{depthfirst} < 0;
         }
