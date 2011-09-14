@@ -6,6 +6,8 @@ Revision history for Path-Class-Rule
 
   [NEW FEATURES]
 
+    - Added 'iname' rule method for case insensitive name matching
+
     - Added 'skip' logic method for easy custom pruning
 
     - Added lexical warnings category

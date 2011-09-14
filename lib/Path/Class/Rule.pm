@@ -11,6 +11,7 @@ use warnings::register;
 
 # Dependencies
 use namespace::autoclean;
+use re 'regexp_pattern';
 use Carp;
 use List::Util qw/first/;
 use Number::Compare 0.02;
@@ -225,8 +226,11 @@ sub _taskify {
 #--------------------------------------------------------------------------#
 
 sub _regexify {
-  my $re = shift;
-  return ref($_) && reftype($_) eq 'REGEXP' ? $_ : glob_to_regex($_);
+  my ($re, $add) = @_;
+  $add ||= '';
+  my $new = ref($re) && reftype($re) eq 'REGEXP' ? $re : glob_to_regex($re);
+  my ($pattern, $flags) = regexp_pattern($new);
+  return qr/(?^$flags$add)$pattern/;
 }
 
 # "simple" helpers take no arguments
@@ -243,12 +247,21 @@ while ( my ($k,$v) = each %simple_helpers ) {
 # "complex" helpers take arguments
 my %complex_helpers = (
   name => sub {
-    Carp::croak("No patterns provided to 'skip_dirs'") unless @_;
+    Carp::croak("No patterns provided to 'name'") unless @_;
     my @patterns = map { _regexify($_) } @_;
     return sub {
       my $f = shift;
       my $name = $f->relative($f->parent);
       return (first { $name =~ $_} @patterns ) ? 1 : 0;
+    }
+  },
+  iname => sub {
+    Carp::croak("No patterns provided to 'iname'") unless @_;
+    my @patterns = map { _regexify($_, "i") } @_;
+    return sub {
+      my $f = shift;
+      my $name = $f->relative($f->parent);
+      return (first { $name =~ m{$_}i } @patterns ) ? 1 : 0;
     }
   },
   min_depth => sub {
@@ -594,6 +607,14 @@ C<and> method.  Rule methods return the object to allow for method chaining.
 The C<name> method takes one or more patterns and creates a rule that is true
 if any of the patterns match the B<basename> of the file or directory path.
 Patterns may be regular expressions or glob expressions (or literal names).
+
+=head3 C<iname>
+
+  $rule->iname( "foo.txt" );
+  $rule->iname( qr/foo/, "bar.*");
+
+The C<iname> method is just like the C<name> method, but matches
+case-insensitively.
 
 =head3 C<skip_dirs>
 
