@@ -8,12 +8,8 @@ TODO for Path::Class::Rule
 - memoize Path::Class::stat for duration of test()?
 
 # rule helper ideas
-- iname (case-insensitive)
 - path (full path matching, not just basename)
-- perl (perl files)
-- shebang
 - dotfiles
-- skip_vcs
 - backups (*~, etc.)
 
 
