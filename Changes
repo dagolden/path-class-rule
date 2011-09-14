@@ -4,7 +4,11 @@ Revision history for Path-Class-Rule
   
   [NEW FEATURES]
 
-    - Added 'skip_vcs' (and individual VCS skip methods)
+    - Added 'skip_vcs' (and individual VCS skipping rule methods)
+
+    - Added 'perl_files' (and similar rule methods)
+
+    - Added 'shebang' rule method
 
 0.002     2011-09-12 14:17:13 America/New_York
 

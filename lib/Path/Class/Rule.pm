@@ -245,6 +245,18 @@ my %complex_helpers = (
       return $stash->{_depth} <= $max_depth ? 1 : "0 but true"; # prune
     }
   },
+  shebang => sub {
+    Carp::croak("No patterns provided to 'shebang'") unless @_;
+    my @patterns = map { _regexify($_) } @_;
+    return sub {
+      my $f = shift;
+      return unless ! $f->is_dir;
+      my $fh = $f->open;
+      my $shebang = <$fh>;
+      return unless defined $shebang;
+      return (first { $shebang =~ $_} @patterns ) ? 1 : 0;
+    };
+  },
 );
 
 while ( my ($k,$v) = each %complex_helpers ) {
@@ -353,6 +365,35 @@ while ( my ($name, $coderef) = each %vcs_rules ) {
   __PACKAGE__->add_helper( $name, $coderef, 1 ); # don't create not_*
 }
 
+
+# perl rules adapted from File::Find::Rule::Perl
+my %perl_rules = (
+  perl_module     => sub { return Path::Class::Rule->new->file->name('*.pm') },
+  perl_pod        => sub { return Path::Class::Rule->new->file->name('*.pod') },
+  perl_test       => sub { return Path::Class::Rule->new->file->name('*.t') },
+  perl_installer  => sub {
+    return Path::Class::Rule->new->file->name('Makefile.PL', 'Build.PL')
+  },
+  perl_script     => sub {
+    return Path::Class::Rule->new->file->or(
+      Path::Class::Rule->new->name('*.pl'),
+      Path::Class::Rule->new->shebang(qr/#!.*\bperl\b/),
+    );
+  },
+  perl_file       => sub {
+    return Path::Class::Rule->new->or(
+      Path::Class::Rule->new->perl_module,
+      Path::Class::Rule->new->perl_pod,
+      Path::Class::Rule->new->perl_test,
+      Path::Class::Rule->new->perl_installer,
+      Path::Class::Rule->new->perl_script,
+    );
+  },
+);
+
+while ( my ($name, $coderef) = each %perl_rules ) {
+  __PACKAGE__->add_helper( $name, $coderef );
+}
 
 1;
 
@@ -613,6 +654,21 @@ The C<min_depth> and C<max_depth> rule methods take a single argument
 and limit the paths returned to a minimum or maximum depth (respectively)
 from the starting search directory.
 
+=head2 Perl file rules
+
+  # All perl rules
+  $rule->perl_files;
+
+  # Individual perl file rules
+  $rule->perl_module;     # .pm files
+  $rule->perl_pod;        # .pod files 
+  $rule->perl_test;       # .t files
+  $rule->perl_installer;  # Makefile.PL or Build.PL
+  $rule->perl_script;     # .pl or 'perl' in the shebang
+
+These rule methods match file names (or a shebang line) that are typical
+of Perl distribution files.
+
 =head2 Version control file rules
 
   # Skip all known VCS files
@@ -640,6 +696,13 @@ correct behavior.
 The C<dangling> rule method matches dangling symlinks.  Use it or its inverse
 to control how dangling symlinks should be treated.  Note that a dangling
 symlink will be returned by the iterator as a L<Path::Class::File> object.
+
+=head3 C<shebang>
+
+  $rule->shebang(qr/#!.*\bperl\b/);
+
+The C<shebang> rule takes a list of regular expressions or glob patterns and
+checks them against the first line of a file.
 
 =head2 Negated rules
 
