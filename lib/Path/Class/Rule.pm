@@ -891,11 +891,10 @@ Some features are still unimplemented:
 
 =for :list
 * Taint mode support
-* Error handling callback
-* Assorted L<File::Find::Rule> helpers (e.g. C<grep>)
+* Some L<File::Find::Rule> helpers (e.g. C<grep>)
 * Extension class loading via C<import()>
 
-Test coverage is poor.
+Test coverage is not great.
 
 Filetest operators and stat rules are subject to the usual portability
 considerations.  See L<perlport> for details.
