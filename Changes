@@ -2,6 +2,11 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [DOCUMENTATION]
+
+    - Clarified caveats about taint mode.  Path::Class::Rule runs under
+      taint mode; it offers no options to automatically untaint data
+
 0.005     2011-09-14 16:58:25 America/New_York
 
   [NEW FEATURES]

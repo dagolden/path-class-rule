@@ -896,7 +896,7 @@ This is an early release for community feedback and contribution.
 Some features are still unimplemented:
 
 =for :list
-* Taint mode support
+* Untainting options
 * Some L<File::Find::Rule> helpers (e.g. C<grep>)
 * Extension class loading via C<import()>
 
