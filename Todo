@@ -6,6 +6,8 @@ TODO for Path::Class::Rule
 - custom sorting?
 - normalize paths to unix slashes?
 - memoize Path::Class::stat for duration of test()?
+- cache File::stat in state structure; reimplement all filetests
+  to use cached stat and Fcntl constants instead of -X operators
 
 # rule helper ideas
 - path (full path matching, not just basename)
