@@ -15,6 +15,14 @@ However, you can run tests directly using the 'prove' tool:
 For most distributions, 'prove' is entirely sufficent for you to test any
 patches you have.
 
+You may need to satisfy some dependencies.  See the included META.json
+file for a list.  If you install App::mymeta_requires from CPAN, it's easy
+to satisfy any that you are missing by piping the output to your favorite
+CPAN client:
+
+  $ mymeta-requires | cpanm
+  $ cpan `mymeta-requires`
+
 Likewise, much of the documentation Pod is generated at release time.
 Depending on the distribution, some documentation may be written in a Pod
 dialect called WikiDoc. (See Pod::WikiDoc on CPAN.) If you would like to
