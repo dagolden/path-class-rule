@@ -2,6 +2,8 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+0.006     2011-10-19 21:40:01 America/New_York
+
   [BUG FIXES]
 
     - Fixed incompability with Perl < v5.14 [rt.cpan.org #71400]
