@@ -4,7 +4,7 @@
       "David Golden <dagolden@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300002, CPAN::Meta::Converter version 2.112580",
+   "generated_by" : "Dist::Zilla version 4.300002, CPAN::Meta::Converter version 2.110930",
    "license" : [
       "apache_2_0"
    ],
@@ -75,11 +75,11 @@
          "mailto" : "bug-path-class-rule at rt.cpan.org",
          "web" : "http://rt.cpan.org/Public/Dist/Display.html?Name=Path-Class-Rule"
       },
-      "homepage" : "https://github.com/dagolden/path-class-rule",
+      "homepage" : "http://github.com/dagolden/path-class-rule",
       "repository" : {
          "type" : "git",
-         "url" : "https://github.com/dagolden/path-class-rule.git",
-         "web" : "https://github.com/dagolden/path-class-rule"
+         "url" : "http://github.com/dagolden/path-class-rule",
+         "web" : "http://github.com/dagolden/path-class-rule"
       }
    },
    "version" : "0.006"

@@ -595,9 +595,9 @@ progress on the request by the system.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<https://github.com/dagolden/path-class-rule>
+L<http://github.com/dagolden/path-class-rule>
 
-  git clone https://github.com/dagolden/path-class-rule.git
+  git clone http://github.com/dagolden/path-class-rule
 
 =head1 AUTHOR
 
