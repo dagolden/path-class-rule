@@ -2,6 +2,10 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [BUG FIXES]
+
+    - Fixed incompability with Perl < v5.14 [rt.cpan.org #71400]
+
   [DOCUMENTATION]
 
     - Clarified caveats about taint mode.  Path::Class::Rule runs under
