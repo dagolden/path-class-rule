@@ -6,7 +6,7 @@ Revision history for Path-Class-Rule
 
     - Win32: Fix test failures
 
-    - Removed unintended requirement for Perl 5.10
+    - Fixed regexp handling on Perl 5.10
 
 0.006     2011-10-19 21:40:01 America/New_York
 
