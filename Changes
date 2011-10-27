@@ -2,6 +2,10 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [BUG FIXES]
+
+    - Win32: Fix test failures
+
 0.006     2011-10-19 21:40:01 America/New_York
 
   [BUG FIXES]

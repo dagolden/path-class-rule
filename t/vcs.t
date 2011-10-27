@@ -37,7 +37,7 @@ my $td = make_tree(@tree);
     aaaa.txt
     bbbb.txt
   )];
-  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "not_vcs test")
     or diag explain { got => \@files, expected => $expected };
 }

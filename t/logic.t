@@ -34,7 +34,7 @@ my $td = make_tree(@tree);
     cccc/dddd.txt
     cccc/eeee/ffff.txt
   )];
-  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "not() test")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -48,7 +48,7 @@ my $td = make_tree(@tree);
   );
   my $expected = [qw/bbbb.txt gggg.txt/];
 
-  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "or() test")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -65,7 +65,7 @@ my $td = make_tree(@tree);
     aaaa.txt
     bbbb.txt
   )];
-  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "skip() test")
     or diag explain { got => \@files, expected => $expected };
 }

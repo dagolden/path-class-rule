@@ -61,17 +61,17 @@ use Path::Class::Rule;
   my ($iter, @files);
   my $rule = Path::Class::Rule->new;
 
-  @files = map  { $_->relative($td)->stringify }
+  @files = map  { $_->relative($td)->as_foreign("Unix")->stringify }
                 $rule->all({depthfirst => 0}, $td);
   cmp_deeply( \@files, \@breadth, "Breadth first iteration")
     or diag explain \@files;
 
-  @files = map  { $_->relative($td)->stringify }
+  @files = map  { $_->relative($td)->as_foreign("Unix")->stringify }
                 $rule->all({depthfirst => 1}, $td);
   cmp_deeply( \@files, \@depth_pre, "Depth first iteration (pre)")
     or diag explain \@files;
 
-  @files = map  { $_->relative($td)->stringify }
+  @files = map  { $_->relative($td)->as_foreign("Unix")->stringify }
                 $rule->all({depthfirst => -1}, $td);
   cmp_deeply( \@files, \@depth_post, "Depth first iteration (post)")
     or diag explain \@files;

@@ -46,7 +46,7 @@ for my $f ( map { file($td, $_) } @bin ) {
     lib/Foo.pod
     t/test.t
   )];
-  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "all perl files")
     or diag explain { got => \@files, expected => $expected };
 }

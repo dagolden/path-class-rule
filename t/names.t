@@ -25,7 +25,7 @@ my $td = make_tree(@tree);
 {
   my $rule = Path::Class::Rule->new->name('Foo');
   my $expected = [ ];
-  my @files = map { $_->relative($td)->stringify } $rule->all($td);
+  my @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "name('Foo') empty match")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -36,7 +36,7 @@ my $td = make_tree(@tree);
     lib/Foo.pm
     lib/Foo.pod
   )];
-  my @files = map { $_->relative($td)->stringify } $rule->all($td);
+  my @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "name('Foo.*') match")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -47,7 +47,7 @@ my $td = make_tree(@tree);
     lib/Foo.pm
     lib/Foo.pod
   )];
-  my @files = map { $_->relative($td)->stringify } $rule->all($td);
+  my @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "name(qr/Foo/) match")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -58,7 +58,7 @@ my $td = make_tree(@tree);
     lib/Foo.pm
     lib/Foo.pod
   )];
-  my @files = map { $_->relative($td)->stringify } $rule->all($td);
+  my @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "name('*.pod', '*.pm') match")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -69,7 +69,7 @@ my $td = make_tree(@tree);
     lib/Foo.pm
     lib/Foo.pod
   )];
-  my @files = map { $_->relative($td)->stringify } $rule->all($td);
+  my @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "iname(qr/foo/) match")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -80,7 +80,7 @@ my $td = make_tree(@tree);
     lib/Foo.pm
     lib/Foo.pod
   )];
-  my @files = map { $_->relative($td)->stringify } $rule->all($td);
+  my @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "iname('foo.*') match")
     or diag explain { got => \@files, expected => $expected };
 }

@@ -33,7 +33,7 @@ my $td = make_tree(@tree);
     cccc/eeee/ffff.txt
     hhhh/iiii/jjjj/kkkk/llll/mmmm.txt
   )];
-  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "min_depth(3) test")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -47,7 +47,7 @@ my $td = make_tree(@tree);
     gggg.txt
     cccc/dddd.txt
   )];
-  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "max_depth(2) test")
     or diag explain { got => \@files, expected => $expected };
 }
@@ -59,7 +59,7 @@ my $td = make_tree(@tree);
     cccc/dddd.txt
     cccc/eeee/ffff.txt
   )];
-  @files = map { $_->relative($td)->stringify } $rule->all($td);
+  @files = map { $_->relative($td)->as_foreign("Unix")->stringify } $rule->all($td);
   cmp_deeply( \@files, $expected, "min_depth(2)->max_depth(3) test")
     or diag explain { got => \@files, expected => $expected };
 }
