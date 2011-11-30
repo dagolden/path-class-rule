@@ -580,6 +580,12 @@ Moose-based and offers no control over ordering or following symlinks.
 L<File::Find::Node> has no iterator, does matching via callback and offers
 no control over ordering.
 
+L<File::Set> builds up a set of files to operate on from a list of directories
+to include or exclude, with control over recursion.  A callback is applied to
+each file (or directory) in the set.  There is no iterator.  There is no
+control over ordering.  Symlinks are not followed.  It has several extra
+features for checksumming the set and creating tarballs with F</bin/tar>.
+
 =for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
 
 =head1 SUPPORT
