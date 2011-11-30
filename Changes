@@ -2,6 +2,8 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+0.008     2011-11-30 09:54:03 EST5EDT
+
   [DOCUMENTATION]
 
     - Added File::Set to "See Also" section
