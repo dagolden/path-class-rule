@@ -10,12 +10,11 @@ package Path::Class::Rule;
 use warnings::register;
 
 # Dependencies
-use namespace::autoclean;
 use re 'regexp_pattern';
 use Carp;
 use List::Util qw/first/;
 use Number::Compare 0.02;
-use Path::Class;
+use Path::Class::Dir qw();
 use Scalar::Util qw/blessed/;
 use Text::Glob qw/glob_to_regex/;
 use Try::Tiny;
@@ -75,7 +74,7 @@ sub iter {
   my $args =  ref($_[0])  && !blessed($_[0])  ? shift
             : ref($_[-1]) && !blessed($_[-1]) ? pop : {};
   my $opts = { %defaults, %$args };
-  my @queue = map { { path => dir($_), depth => 0 } } @_ ? @_ : '.';
+  my @queue = map { { path => Path::Class::Dir->new($_), depth => 0 } } @_ ? @_ : '.';
   my $stash = {};
   my %seen;
 
