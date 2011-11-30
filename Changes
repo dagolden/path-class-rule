@@ -2,6 +2,11 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [OTHER]
+
+    - Removed namespace::autoclean as a dependency because it depends on
+      the whole Moose stack.  [rt.cpan.org #72841, patch by Lars Dɪᴇᴄᴋᴏᴡ]
+
 0.007     2011-10-26 23:50:57 America/New_York
 
   [BUG FIXES]
