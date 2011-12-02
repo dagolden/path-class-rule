@@ -24,7 +24,7 @@ my $td = make_tree(@tree);
 {
   my $rule = Path::Class::Rule->new->and( sub { die "Evil here" } );
   eval { $rule->all($td) };
-  like( $@, qr/^$td: Evil here/, "default error handler dies" );
+  like( $@, qr/^\Q$td\E: Evil here/, "default error handler dies" );
 }
 
 {

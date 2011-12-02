@@ -65,7 +65,7 @@
    "provides" : {
       "Path::Class::Rule" : {
          "file" : "lib/Path/Class/Rule.pm",
-         "version" : "0.008"
+         "version" : "0.009"
       }
    },
    "release_status" : "stable",
@@ -81,6 +81,6 @@
          "web" : "https://github.com/dagolden/path-class-rule"
       }
    },
-   "version" : "0.008"
+   "version" : "0.009"
 }
 

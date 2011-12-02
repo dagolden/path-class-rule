@@ -2,6 +2,11 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [BUG FIXES]
+
+    - Fix t/error_handler.t regex to prevent errors from backslashes in
+      paths on Windows
+
 0.008     2011-11-30 09:54:03 EST5EDT
 
   [DOCUMENTATION]
