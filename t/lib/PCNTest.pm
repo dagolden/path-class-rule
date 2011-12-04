@@ -4,7 +4,8 @@ package PCNTest;
 use Path::Class;
 use File::Temp; 
 
-use parent 'Exporter';
+use Exporter;
+our @ISA = qw/Exporter/;
 our @EXPORT = qw/make_tree/;
 
 sub make_tree {

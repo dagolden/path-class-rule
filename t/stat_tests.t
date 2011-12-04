@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use Test::More 0.92;
 use Path::Class;
-use File::Copy qw/copy/;
 use File::Temp;
 use File::pushd qw/pushd/;
 
@@ -11,6 +10,12 @@ use lib 't/lib';
 use PCNTest;
 
 use Path::Class::Rule;
+
+sub copy {
+  my ($src, $dst) = @_;
+  open my $fh, ">", $dst;
+  print {$fh} do { local (@ARGV, $/) = $src; <> };
+}
 
 #--------------------------------------------------------------------------#
 
@@ -22,6 +27,7 @@ use Path::Class::Rule;
   ));
 
   my $changes = file($td, 'data', 'Changes');
+
   copy( file('Changes'), $changes );
   
   $rule = Path::Class::Rule->new->file;

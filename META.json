@@ -50,22 +50,20 @@
          "requires" : {
             "Config" : 0,
             "Exporter" : 0,
-            "File::Copy" : 0,
             "File::Find" : 0,
             "File::Temp" : 0,
             "File::pushd" : 0,
             "Path::Class" : 0,
             "Test::Deep" : 0,
             "Test::More" : "0.92",
-            "autodie" : 0,
-            "parent" : 0
+            "autodie" : 0
          }
       }
    },
    "provides" : {
       "Path::Class::Rule" : {
          "file" : "lib/Path/Class/Rule.pm",
-         "version" : "0.009"
+         "version" : "0.010"
       }
    },
    "release_status" : "stable",
@@ -81,6 +79,6 @@
          "web" : "https://github.com/dagolden/path-class-rule"
       }
    },
-   "version" : "0.009"
+   "version" : "0.010"
 }
 
