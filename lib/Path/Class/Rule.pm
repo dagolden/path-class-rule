@@ -923,7 +923,7 @@ considerations.  See L<perlport> for details.
 =head1 SEE ALSO
 
 There are many other file finding modules out there.  They all have various
-features/deficiencies, depending on one's preferences and needs.  Here is an
+features/deficiencies, depending on your preferences and needs.  Here is an
 (incomplete) list of alternatives, with some comparison commentary.
 
 L<File::Find> is part of the Perl core.  It requires the user to write a
@@ -943,7 +943,7 @@ L<File::Next> provides iterators for file, directories or "everything".  It
 takes two callbacks, one to match files and one to decide which directories to
 descend.  It does not allow control over breadth/depth order, though it does
 provide means to sort files for processing within a directory. Like
-L<File::Find>, it requires callbacks to use global varaibles.
+L<File::Find>, it requires callbacks to use global variables.
 
 L<Path::Class::Iterator> walks a directory structure with an iterator.  It is
 implemented as L<Path::Class> subclasses, which adds a degree of extra
@@ -953,13 +953,13 @@ L<Path::Class::Iterator::Dir> object for evaluation.
 
 L<File::Find::Object> and companion L<File::Find::Object::Rule> are like
 File::Find and File::Find::Rule, but without File::Find inside.  They use an
-interator that does not precompute results. They can return
+iterator that does not precompute results. They can return
 L<File::Find::Object::Result> objects, which give a subset of the utility
 of Path::Class objects.  L<File::Find::Object::Rule> appears to be a literal
 translation of L<File::Find::Rule>, including oddities like making C<-M> into a
 boolean.
 
-L<File::chdir::WalkDir> recursively chdirs a tree, calling a callback on each
+L<File::chdir::WalkDir> recursively descends a tree, calling a callback on each
 file.  No iterator.  Supports exclusion patterns.  Depth-first post-order by
 default, but offers pre-order option. Does not process symlinks.
 
