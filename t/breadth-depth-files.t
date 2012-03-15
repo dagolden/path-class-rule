@@ -23,24 +23,11 @@ use Path::Class::Rule;
     gggg.txt
   );
 
-  my @breadth = qw(
-    .
-    aaaa.txt
-    bbbb.txt
-    cccc
-    gggg.txt
-    cccc/dddd.txt
-    cccc/eeee
-    cccc/eeee/ffff.txt
-  );
   
   my @depth_pre = qw(
-    .
     aaaa.txt
     bbbb.txt
-    cccc
     cccc/dddd.txt
-    cccc/eeee
     cccc/eeee/ffff.txt
     gggg.txt
   );
@@ -50,21 +37,13 @@ use Path::Class::Rule;
     bbbb.txt
     cccc/dddd.txt
     cccc/eeee/ffff.txt
-    cccc/eeee
-    cccc
     gggg.txt
-    .
   );
 
   my $td = make_tree(@tree);
 
   my ($iter, @files);
-  my $rule = Path::Class::Rule->new;
-
-  @files = map  { $_->relative($td)->as_foreign("Unix")->stringify }
-                $rule->all({depthfirst => 0}, $td);
-  cmp_deeply( \@files, \@breadth, "Breadth first iteration")
-    or diag explain \@files;
+  my $rule = Path::Class::Rule->new->file;
 
   @files = map  { $_->relative($td)->as_foreign("Unix")->stringify }
                 $rule->all({depthfirst => -1}, $td);

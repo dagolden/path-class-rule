@@ -104,9 +104,9 @@ sub iter {
           # for postorder, requeue as reference to signal it can be returned
           # without being retested
           push @next, { path => \$item, depth => $depth}
-            if $opts->{depthfirst} < 0;
+            if $interest && $opts->{depthfirst} > 0;
           unshift @queue, @next;
-          redo LOOP if $opts->{depthfirst} < 0;
+          redo LOOP if $opts->{depthfirst} > 0;
         }
         else {
           push @queue, $self->_taskify($depth+1, $item->children);
