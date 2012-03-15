@@ -4,7 +4,7 @@
       "David Golden <dagolden@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300002, CPAN::Meta::Converter version 2.112580",
+   "generated_by" : "Dist::Zilla version 4.300009, CPAN::Meta::Converter version 2.120630",
    "license" : [
       "apache_2_0"
    ],
@@ -32,38 +32,38 @@
       },
       "runtime" : {
          "requires" : {
-            "Carp" : 0,
-            "List::Util" : 0,
+            "Carp" : "0",
+            "List::Util" : "0",
             "Number::Compare" : "0.02",
-            "Path::Class::Dir" : 0,
-            "Scalar::Util" : 0,
-            "Text::Glob" : 0,
-            "Try::Tiny" : 0,
+            "Path::Class::Dir" : "0",
+            "Scalar::Util" : "0",
+            "Text::Glob" : "0",
+            "Try::Tiny" : "0",
             "perl" : "5.010",
-            "re" : 0,
-            "strict" : 0,
-            "warnings" : 0,
-            "warnings::register" : 0
+            "re" : "0",
+            "strict" : "0",
+            "warnings" : "0",
+            "warnings::register" : "0"
          }
       },
       "test" : {
          "requires" : {
-            "Config" : 0,
-            "Exporter" : 0,
-            "File::Find" : 0,
-            "File::Temp" : 0,
-            "File::pushd" : 0,
-            "Path::Class" : 0,
-            "Test::Deep" : 0,
+            "Config" : "0",
+            "Exporter" : "0",
+            "File::Find" : "0",
+            "File::Temp" : "0",
+            "File::pushd" : "0",
+            "Path::Class" : "0",
+            "Test::Deep" : "0",
             "Test::More" : "0.92",
-            "autodie" : 0
+            "autodie" : "0"
          }
       }
    },
    "provides" : {
       "Path::Class::Rule" : {
          "file" : "lib/Path/Class/Rule.pm",
-         "version" : "0.010"
+         "version" : "0.011"
       }
    },
    "release_status" : "stable",
@@ -79,6 +79,6 @@
          "web" : "https://github.com/dagolden/path-class-rule"
       }
    },
-   "version" : "0.010"
+   "version" : "0.011"
 }
 
