@@ -1,10 +1,12 @@
+=pod
+
 =head1 NAME
 
 Path::Class::Rule - File finder using Path::Class
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 SYNOPSIS
 
@@ -593,7 +595,7 @@ features for checksumming the set and creating tarballs with F</bin/tar>.
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<http://rt.cpan.org/Public/Dist/Display.html?Name=Path-Class-Rule>.
+at L<https://rt.cpan.org/Public/Dist/Display.html?Name=Path-Class-Rule>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -603,7 +605,7 @@ public review and contribution under the terms of the license.
 
 L<https://github.com/dagolden/path-class-rule>
 
-  git clone https://github.com/dagolden/path-class-rule.git
+  git clone git://github.com/dagolden/path-class-rule.git
 
 =head1 AUTHOR
 
