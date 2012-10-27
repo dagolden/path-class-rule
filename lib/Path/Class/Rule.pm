@@ -12,6 +12,7 @@ use warnings::register;
 # Dependencies
 use re 'regexp_pattern';
 use Carp;
+use Data::Clone qw/data_clone/;
 use List::Util qw/first/;
 use Number::Compare 0.02;
 use Path::Class::Dir qw();
@@ -30,7 +31,7 @@ sub new {
 
 sub clone {
   my $self = shift;
-  return bless { %$self }, ref $self;
+  return data_clone($self);
 }
 
 sub add_helper {

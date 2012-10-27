@@ -2,6 +2,10 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [BUG FIXES]
+
+    - Rule cloning now does deep clone with Data::Clone [rt.cpan.org #80426]
+
 0.011     2012-03-15 09:55:33 EST5EDT
 
   [BUG FIXES]
