@@ -2,6 +2,11 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [DOCUMENTATION]
+
+    - The method for all perl file types is 'perl_file', not 'perl_files'
+      [rt.cpan.org #81945]
+
 0.012     2012-10-26 21:51:27 America/New_York
 
   [BUG FIXES]

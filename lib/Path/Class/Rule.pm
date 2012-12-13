@@ -755,7 +755,7 @@ from the starting search directory.
 =head2 Perl file rules
 
   # All perl rules
-  $rule->perl_files;
+  $rule->perl_file;
 
   # Individual perl file rules
   $rule->perl_module;     # .pm files
