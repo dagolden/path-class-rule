@@ -517,7 +517,7 @@ Here is a summary of features for comparison to other file finding modules:
 
 Creates a new rule object that matches any file or directory.  It takes
 no arguments. For convenience, it may also be called on an object, in which
-case it still returns a new object hat matches any file or directory.
+case it still returns a new object that matches any file or directory.
 
 =head3 C<clone>
 
