@@ -15,7 +15,7 @@ use Carp;
 use Data::Clone qw/data_clone/;
 use List::Util qw/first/;
 use Number::Compare 0.02;
-use Path::Class::Dir qw();
+use Path::Class::Dir 0.22 ();
 use Scalar::Util qw/blessed/;
 use Text::Glob qw/glob_to_regex/;
 use Try::Tiny;
@@ -285,7 +285,7 @@ my %complex_helpers = (
     my @patterns = map { _regexify($_) } @_;
     return sub {
       my $f = shift;
-      my $name = $f->relative($f->parent);
+      my $name = $f->basename;
       return (first { $name =~ $_} @patterns ) ? 1 : 0;
     }
   },
@@ -294,7 +294,7 @@ my %complex_helpers = (
     my @patterns = map { _regexify($_, "i") } @_;
     return sub {
       my $f = shift;
-      my $name = $f->relative($f->parent);
+      my $name = $f->basename;
       return (first { $name =~ m{$_}i } @patterns ) ? 1 : 0;
     }
   },
@@ -920,6 +920,10 @@ Some features are still unimplemented:
 
 Filetest operators and stat rules are subject to the usual portability
 considerations.  See L<perlport> for details.
+
+Performance suffers somewhat from all of the abstraction layers
+of L<Path::Class> and L<File::Spec>.  Hopefully, convenience
+makes up for that.
 
 =head1 SEE ALSO
 

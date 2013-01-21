@@ -6,7 +6,7 @@ Path::Class::Rule - File finder using Path::Class
 
 =head1 VERSION
 
-version 0.013
+version 0.014
 
 =head1 SYNOPSIS
 
@@ -527,6 +527,10 @@ Extension class loading via C<import()>
 
 Filetest operators and stat rules are subject to the usual portability
 considerations.  See L<perlport> for details.
+
+Performance suffers somewhat from all of the abstraction layers
+of L<Path::Class> and L<File::Spec>.  Hopefully, convenience
+makes up for that.
 
 =head1 SEE ALSO
 
