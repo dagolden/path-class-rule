@@ -2,6 +2,8 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+0.014     2013-01-21 14:19:04 America/New_York
+
   [OPTIMIZATION]
 
     - Use Path::Class's basename() internally,, resulting in a 50%
