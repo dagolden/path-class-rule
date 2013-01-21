@@ -2,6 +2,10 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [DOCUMENTATION]
+
+    - Oops.  Left off a doc fix from the master repo.  Merged now.
+
 0.014     2013-01-21 14:19:04 America/New_York
 
   [OPTIMIZATION]
