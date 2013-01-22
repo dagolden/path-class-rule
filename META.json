@@ -1,5 +1,5 @@
 {
-   "abstract" : "File finder using Path::Class",
+   "abstract" : "File::Finder using Path::Class",
    "author" : [
       "David Golden <dagolden@cpan.org>"
    ],
@@ -38,19 +38,13 @@
       },
       "runtime" : {
          "requires" : {
-            "Carp" : "0",
-            "Data::Clone" : "0",
-            "List::Util" : "0",
-            "Number::Compare" : "0.02",
-            "Path::Class::Dir" : "0.22",
-            "Scalar::Util" : "0",
-            "Text::Glob" : "0",
-            "Try::Tiny" : "0",
-            "perl" : "5.010",
-            "re" : "0",
+            "Path::Class" : "0",
+            "Path::Iterator::Rule" : "0",
+            "namespace::clean" : "0",
+            "parent" : "0",
+            "perl" : "5.006",
             "strict" : "0",
-            "warnings" : "0",
-            "warnings::register" : "0"
+            "warnings" : "0"
          }
       },
       "test" : {
@@ -60,17 +54,17 @@
             "File::Find" : "0",
             "File::Temp" : "0",
             "File::pushd" : "0",
-            "Path::Class" : "0",
             "Test::Deep" : "0",
             "Test::More" : "0.92",
-            "autodie" : "0"
+            "autodie" : "0",
+            "perl" : "5.006"
          }
       }
    },
    "provides" : {
       "Path::Class::Rule" : {
          "file" : "lib/Path/Class/Rule.pm",
-         "version" : "0.015"
+         "version" : "0.016"
       }
    },
    "release_status" : "stable",
@@ -86,6 +80,6 @@
          "web" : "https://github.com/dagolden/path-class-rule"
       }
    },
-   "version" : "0.015"
+   "version" : "0.016"
 }
 

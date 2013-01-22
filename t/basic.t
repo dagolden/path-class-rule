@@ -30,6 +30,7 @@ use Path::Class::Rule;
   }
 
   is( scalar @files, 1, "Iterator: one file") or diag explain \@files;
+  isa_ok( $files[0], 'Path::Class::Entity', "Iterator: returns Path::Class object" );
 
   @files = ();
   @files = $rule->all($td);
