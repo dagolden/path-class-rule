@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-Path::Class::Rule - File::Finder using Path::Class
+Path::Class::Rule - Iterative, recursive file finder with Path::Class
 
 =head1 VERSION
 
@@ -47,7 +47,7 @@ This module may be extended in the same way as C<Path::Iterator::Rule>, but
 test subroutines receive C<Path::Class> objects instead of strings.
 
 Consider whether you should extend C<Path::Iterator::Rule> or C<Path::Class::Rule>.
-Extending this module specifically is recommended if your test rely on having
+Extending this module specifically is recommended if your tests rely on having
 a C<Path::Class> object.
 
 =head1 LEXICAL WARNINGS
@@ -66,7 +66,7 @@ correct scope:
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://rt.cpan.org/Public/Dist/Display.html?Name=Path-Class-Rule>.
+at L<https://github.com/dagolden/path-class-rule/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code

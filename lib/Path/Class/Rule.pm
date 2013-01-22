@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 package Path::Class::Rule;
-# ABSTRACT: File::Finder using Path::Class
+# ABSTRACT: Iterative, recursive file finder with Path::Class
 # VERSION
 
 use parent 'Path::Iterator::Rule';
@@ -63,7 +63,7 @@ This module may be extended in the same way as C<Path::Iterator::Rule>, but
 test subroutines receive C<Path::Class> objects instead of strings.
 
 Consider whether you should extend C<Path::Iterator::Rule> or C<Path::Class::Rule>.
-Extending this module specifically is recommended if your test rely on having
+Extending this module specifically is recommended if your tests rely on having
 a C<Path::Class> object.
 
 =head1 LEXICAL WARNINGS
