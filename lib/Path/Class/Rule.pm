@@ -5,7 +5,8 @@ package Path::Class::Rule;
 # ABSTRACT: Iterative, recursive file finder with Path::Class
 # VERSION
 
-use parent 'Path::Iterator::Rule';
+use Path::Iterator::Rule 0.002; # new _children API
+our @ISA = qw/Path::Iterator::Rule/;
 
 use Path::Class;
 use namespace::clean;
@@ -19,7 +20,7 @@ sub _objectify {
 sub _children {
     my $self = shift;
     my $path = shift;
-    return $path->children;
+    return map { [ $_->basename, $_ ] } $path->children;
 }
 
 1;

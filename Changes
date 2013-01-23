@@ -2,6 +2,10 @@ Revision history for Path-Class-Rule
 
 {{$NEXT}}
 
+  [CHANGES]
+
+    - Updated for internal changes to Path::Iterator::Rule 0.002
+
 0.016     2013-01-22 06:28:03 America/New_York
 
   [CHANGES]
