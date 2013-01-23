@@ -41,9 +41,8 @@
       "runtime" : {
          "requires" : {
             "Path::Class" : "0",
-            "Path::Iterator::Rule" : "0",
+            "Path::Iterator::Rule" : "0.002",
             "namespace::clean" : "0",
-            "parent" : "0",
             "perl" : "5.006",
             "strict" : "0",
             "warnings" : "0"
@@ -66,7 +65,7 @@
    "provides" : {
       "Path::Class::Rule" : {
          "file" : "lib/Path/Class/Rule.pm",
-         "version" : "0.016"
+         "version" : "0.017"
       }
    },
    "release_status" : "stable",
@@ -81,6 +80,6 @@
          "web" : "https://github.com/dagolden/path-class-rule"
       }
    },
-   "version" : "0.016"
+   "version" : "0.017"
 }
 
