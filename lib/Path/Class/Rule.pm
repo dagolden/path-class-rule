@@ -46,17 +46,15 @@ sub _children {
 =head1 DESCRIPTION
 
 This module iterates over files and directories to identify ones matching a
-user-defined set of rules.  The API is based heavily on L<File::Find::Rule>,
-but with more explicit distinction between matching rules and options that
-influence how directories are searched.  A C<Path::Class::Rule> object is a
-collection of rules (match criteria) with methods to add additional criteria.
-Options that control directory traversal are given as arguments to the method
-that generates an iterator.
+user-defined set of rules.
 
 As of version 0.016, this is now a thin subclass of L<Path::Iterator::Rule>
 that operates on and returns L<Path::Class> objects instead of bare file paths.
 
 See that module for details on features and usage.
+
+See L</PERFORMANCE> for important caveats.  You might want to use
+C<Path::Iterator::Rule> instead.
 
 =head1 EXTENDING
 
@@ -75,6 +73,28 @@ skipped).  To disable these categories, put the following statement at the
 correct scope:
 
   no warnings 'Path::Iterator::Rule';
+
+=head1 PERFORMANCE
+
+Because all files and directories as processed as C<Path::Class> objects,
+using this module is significantly slower than C<Path::Iterator::Rule>.
+
+If you are scanning tens of thousands of files and speed is a concern, you
+might be better off using that instead and only creating objects from
+results.
+
+    use Path::Class;
+    use Path::Iterator::Rule;
+
+    my $rule = Path::Iterator::Rule->new->file->size(">10k");
+    my $next = $rule->iter( @dirs );
+
+    while ( my $file = file($next->()) ) {
+        ...
+    }
+
+Generally, I recommend use this module only if you need to write custom rules
+that need C<Path::Class> features.
 
 =cut
 
